@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vigenère Cipher Simulator - Dr. Mohammed Tawfik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #1a237e;
+            color: white;
+            border-radius: 5px;
+        }
+        .vigenere-table {
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        .vigenere-table table {
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        .vigenere-table td {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 12px;
+        }
+        .vigenere-table th {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+        .input-group {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .result-group {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #1a237e;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #283593;
+        }
+        input[type="text"], textarea {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-left: 4px solid #1a237e;
+        }
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .author {
+            font-style: italic;
+            color: #666;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .info-box {
+            background-color: #e3f2fd;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #1a237e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Vigenère Cipher Simulator</h1>
+            <div class="author">Developed for Dr. Mohammed Tawfik's Cryptography Course</div>
+        </div>
+
+        <div class="info-box">
+            <h3>About Vigenère Cipher:</h3>
+            <p>The Vigenère cipher is a polyalphabetic substitution cipher that uses a keyword to encrypt text. Each letter of the keyword determines which Caesar cipher to use for each letter of the plaintext.</p>
+        </div>
+
+        <div class="input-group">
+            <label for="key">Encryption Key:</label><br>
+            <input type="text" id="key" placeholder="Enter key (letters only)" value="CIPHER">
+            <button onclick="validateKey()">Validate Key</button>
+        </div>
+
+        <div class="input-group">
+            <label for="text">Text to Encrypt/Decrypt:</label><br>
+            <textarea id="text" rows="4" placeholder="Enter text (letters only)"></textarea>
+        </div>
+
+        <div class="button-group">
+            <button onclick="encrypt()">Encrypt</button>
+            <button onclick="decrypt()">Decrypt</button>
+            <button onclick="showTable()">Show/Hide Vigenère Table</button>
+        </div>
+
+        <div id="vigenere-table" class="vigenere-table" style="display: none;">
+            <h3>Vigenère Table:</h3>
+        </div>
+
+        <div class="result-group">
+            <h3>Process Steps:</h3>
+            <div id="steps"></div>
+        </div>
+
+        <div class="result-group">
+            <h3>Result:</h3>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Create Vigenère table
+        function createVigenereTable() {
+            let table = '<table><tr><th></th>';
+            for (let i = 0; i < 26; i++) {
+                table += `<th>${String.fromCharCode(65 + i)}</th>`;
+            }
+            table += '</tr>';
+
+            for (let i = 0; i < 26; i++) {
+                table += `<tr><th>${String.fromCharCode(65 + i)}</th>`;
+                for (let j = 0; j < 26; j++) {
+                    let letter = String.fromCharCode(65 + ((i + j) % 26));
+                    table += `<td>${letter}</td>`;
+                }
+                table += '</tr>';
+            }
+            table += '</table>';
+            return table;
+        }
+
+        // Validate key
+        function validateKey() {
+            let key = document.getElementById('key').value.toUpperCase();
+            key = key.replace(/[^A-Z]/g, '');
+            document.getElementById('key').value = key;
+            if (key.length === 0) {
+                alert('Please enter a valid key using letters only.');
+                return false;
+            }
+            return true;
+        }
+
+        // Show/Hide Vigenère table
+        function showTable() {
+            let tableDiv = document.getElementById('vigenere-table');
+            if (tableDiv.style.display === 'none') {
+                tableDiv.style.display = 'block';
+                tableDiv.innerHTML = '<h3>Vigenère Table:</h3>' + createVigenereTable();
+            } else {
+                tableDiv.style.display = 'none';
+            }
+        }
+
+        // Process text with Vigenère cipher
+        function processText(text, key, encrypt = true) {
+            if (!validateKey()) return;
+
+            text = text.toUpperCase().replace(/[^A-Z]/g, '');
+            key = key.toUpperCase();
+            let result = '';
+            let steps = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                let textChar = text.charCodeAt(i) - 65;
+                let keyChar = key.charCodeAt(i % key.length) - 65;
+                let resultChar;
+
+                if (encrypt) {
+                    resultChar = (textChar + keyChar) % 26;
+                } else {
+                    resultChar = (textChar - keyChar + 26) % 26;
+                }
+
+                let finalChar = String.fromCharCode(resultChar + 65);
+                result += finalChar;
+
+                steps += `<div class="step">
+                    Step ${i + 1}: ${text[i]} ${encrypt ? '+' : '-'} ${key[i % key.length]} = ${finalChar}<br>
+                    Text char: ${text[i]} (${textChar})<br>
+                    Key char: ${key[i % key.length]} (${keyChar})<br>
+                    ${encrypt ? 'Sum' : 'Difference'}: ${encrypt ? textChar + keyChar : textChar - keyChar + 26} mod 26 = ${resultChar}<br>
+                    Result: ${finalChar}
+                </div>`;
+            }
+
+            document.getElementById('steps').innerHTML = steps;
+            document.getElementById('result').innerHTML = `<h4>${encrypt ? 'Encrypted' : 'Decrypted'} text:</h4>
+                <div class="highlight">${result}</div>
+                <p>Original text: ${text}</p>
+                <p>Key used: ${key}</p>`;
+        }
+
+        function encrypt() {
+            let text = document.getElementById('text').value;
+            let key = document.getElementById('key').value;
+            processText(text, key, true);
+        }
+
+        function decrypt() {
+            let text = document.getElementById('text').value;
+            let key = document.getElementById('key').value;
+            processText(text, key, false);
+        }
+
+        // Initialize page
+        window.onload = function() {
+            document.getElementById('vigenere-table').innerHTML = createVigenereTable();
+        };
+    </script>
+</body>
+</html>

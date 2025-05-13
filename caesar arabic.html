@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <title>محاكي شفرة قيصر - النسخة العربية د.محمد توفيق</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Traditional Arabic', Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        .simulation {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            direction: rtl;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-family: 'Traditional Arabic', Arial, sans-serif;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+        }
+        .letter-info {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>د.محمد توفيق محاكي شفرة قيصر - النسخة العربية</h1>
+        
+        <div class="input-group">
+            <label for="input-text">النص المراد تشفيره/فك تشفيره:</label><br>
+            <textarea id="input-text" rows="4" style="width: 100%"></textarea>
+        </div>
+
+        <div class="input-group">
+            <label for="shift">مقدار الإزاحة (0-27):</label>
+            <input type="number" id="shift" min="0" max="27" value="3">
+        </div>
+
+        <button onclick="encrypt()">تشفير</button>
+        <button onclick="decrypt()">فك التشفير</button>
+
+        <div class="simulation">
+            <h3>جدول المحاكاة</h3>
+            <div id="alphabet-table"></div>
+        </div>
+
+        <div class="result">
+            <h3>النتيجة:</h3>
+            <p id="result-text"></p>
+        </div>
+
+        <div class="simulation">
+            <h3>تفاصيل المحاكاة:</h3>
+            <div id="simulation-details"></div>
+        </div>
+    </div>
+
+    <script>
+        const arabicAlphabet = 'ابتثجحخدذرزسشصضطظعغفقكلمنهوي';
+        
+        function getCharCode(char) {
+            return arabicAlphabet.indexOf(char);
+        }
+
+        function createAlphabetTable(shift) {
+            let shiftedAlphabet = arabicAlphabet.slice(shift) + arabicAlphabet.slice(0, shift);
+            
+            let table = '<table>';
+            table += '<tr><th>الحرف الأصلي</th>';
+            for (let char of arabicAlphabet) {
+                table += `<td>${char}</td>`;
+            }
+            table += '</tr>';
+            
+            table += '<tr><th>الحرف المشفر</th>';
+            for (let char of shiftedAlphabet) {
+                table += `<td>${char}</td>`;
+            }
+            table += '</tr>';
+            
+            table += '<tr><th>القيمة العددية</th>';
+            for (let i = 0; i < 28; i++) {
+                table += `<td>${i}</td>`;
+            }
+            table += '</tr>';
+            
+            table += '</table>';
+            document.getElementById('alphabet-table').innerHTML = table;
+        }
+
+        function caesarCipher(text, shift, encrypt = true) {
+            if (!encrypt) shift = (28 - shift) % 28;
+            let result = '';
+            let details = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i];
+                let index = getCharCode(char);
+                
+                if (index !== -1) {
+                    let newIndex = (index + shift) % 28;
+                    let newChar = arabicAlphabet[newIndex];
+                    
+                    details += `<div class="letter-info">
+                        الحرف "${char}" (${index}) → "${newChar}" (${newIndex})
+                    </div>`;
+                    result += newChar;
+                } else {
+                    result += char;
+                    details += `<div class="letter-info">
+                        الحرف "${char}" (غير مشفر)
+                    </div>`;
+                }
+            }
+            
+            document.getElementById('simulation-details').innerHTML = details;
+            return result;
+        }
+
+        function encrypt() {
+            const text = document.getElementById('input-text').value;
+            const shift = parseInt(document.getElementById('shift').value);
+            createAlphabetTable(shift);
+            const encrypted = caesarCipher(text, shift, true);
+            document.getElementById('result-text').textContent = encrypted;
+        }
+
+        function decrypt() {
+            const text = document.getElementById('input-text').value;
+            const shift = parseInt(document.getElementById('shift').value);
+            createAlphabetTable(28 - shift);
+            const decrypted = caesarCipher(text, shift, false);
+            document.getElementById('result-text').textContent = decrypted;
+        }
+
+        window.onload = function() {
+            createAlphabetTable(3);
+            
+            // جدول الحروف وقيمها
+            let alphabetInfo = '<div class="simulation"><h3>جدول الحروف العربية وقيمها العددية</h3><table>';
+            for (let i = 0; i < arabicAlphabet.length; i += 7) {
+                alphabetInfo += '<tr>';
+                for (let j = 0; j < 7 && i + j < arabicAlphabet.length; j++) {
+                    let char = arabicAlphabet[i + j];
+                    alphabetInfo += `<td>${char} = ${i + j}</td>`;
+                }
+                alphabetInfo += '</tr>';
+            }
+            alphabetInfo += '</table></div>';
+            document.querySelector('.container').insertAdjacentHTML('beforeend', alphabetInfo);
+        };
+    </script>
+</body>
+</html>

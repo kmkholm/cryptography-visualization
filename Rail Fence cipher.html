@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rail Fence Cipher Simulator - Dr. Mohammed Tawfik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #1e3d59;
+            color: white;
+            border-radius: 5px;
+        }
+        .input-group {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .rail-display {
+            font-family: monospace;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .rail {
+            display: flex;
+            margin: 5px 0;
+        }
+        .cell {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1px;
+        }
+        .cell.active {
+            background-color: #ffd700;
+            font-weight: bold;
+        }
+        button {
+            background-color: #1e3d59;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2b506e;
+        }
+        input[type="text"], input[type="number"], textarea {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .info-box {
+            background-color: #e3f2fd;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #1e3d59;
+        }
+        .author {
+            font-style: italic;
+            color: #666;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-left: 4px solid #1e3d59;
+        }
+        .result {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+        }
+        .highlight {
+            background-color: #ffd700;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .animation-container {
+            position: relative;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Rail Fence Cipher Simulator</h1>
+            <div class="author">Developed for Dr. Mohammed Tawfik's Cryptography Course</div>
+        </div>
+
+        <div class="info-box">
+            <h3>About Rail Fence Cipher:</h3>
+            <p>The Rail Fence Cipher is a transposition cipher that arranges the plaintext in a zigzag pattern across a number of "rails" and then reads off each rail to produce the ciphertext. The pattern is determined by:</p>
+            <ul>
+                <li>Number of rails (fence height)</li>
+                <li>Direction of writing (zigzag pattern)</li>
+                <li>Reading direction (left-to-right along each rail)</li>
+            </ul>
+        </div>
+
+        <div class="input-group">
+            <label for="text">Text to Encrypt/Decrypt:</label><br>
+            <textarea id="text" rows="4" placeholder="Enter text"></textarea>
+        </div>
+
+        <div class="input-group">
+            <label for="rails">Number of Rails (2-10):</label><br>
+            <input type="number" id="rails" min="2" max="10" value="3">
+        </div>
+
+        <div class="button-group">
+            <button onclick="encrypt()">Encrypt</button>
+            <button onclick="decrypt()">Decrypt</button>
+            <button onclick="showPattern()">Show Pattern</button>
+        </div>
+
+        <div class="animation-container">
+            <div id="pattern-display"></div>
+        </div>
+
+        <div class="result">
+            <h3>Process Steps:</h3>
+            <div id="steps"></div>
+        </div>
+
+        <div class="result">
+            <h3>Result:</h3>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        function createRailFence(text, rails, isEncryption) {
+            let fence = Array(rails).fill().map(() => Array(text.length).fill(''));
+            let currentRail = 0;
+            let direction = 1; // 1 for down, -1 for up
+
+            // Fill the fence pattern
+            for (let i = 0; i < text.length; i++) {
+                fence[currentRail][i] = isEncryption ? text[i] : '*';
+                
+                if (currentRail === 0) direction = 1;
+                if (currentRail === rails - 1) direction = -1;
+                
+                currentRail += direction;
+            }
+
+            return fence;
+        }
+
+        function showPattern() {
+            const text = document.getElementById('text').value;
+            const rails = parseInt(document.getElementById('rails').value);
+            
+            if (!text || rails < 2 || rails > 10) {
+                alert('Please enter valid text and number of rails (2-10)');
+                return;
+            }
+
+            const fence = createRailFence(text, rails, true);
+            displayFence(fence);
+        }
+
+        function displayFence(fence) {
+            let html = '<div class="rail-display">';
+            
+            for (let i = 0; i < fence.length; i++) {
+                html += '<div class="rail">';
+                for (let j = 0; j < fence[i].length; j++) {
+                    let cellClass = fence[i][j] ? 'cell active' : 'cell';
+                    html += `<div class="${cellClass}">${fence[i][j] || ''}</div>`;
+                }
+                html += '</div>';
+            }
+            
+            html += '</div>';
+            document.getElementById('pattern-display').innerHTML = html;
+        }
+
+        function encrypt() {
+            const text = document.getElementById('text').value.replace(/\s/g, '');
+            const rails = parseInt(document.getElementById('rails').value);
+            
+            if (!text || rails < 2 || rails > 10) {
+                alert('Please enter valid text and number of rails (2-10)');
+                return;
+            }
+
+            // Create and fill the fence
+            const fence = createRailFence(text, rails, true);
+            displayFence(fence);
+
+            // Read off the cipher text
+            let ciphertext = '';
+            let steps = '<div class="step">Reading along each rail:</div>';
+            
+            for (let i = 0; i < rails; i++) {
+                let railText = fence[i].filter(char => char).join('');
+                ciphertext += railText;
+                steps += `<div class="step">Rail ${i + 1}: ${railText}</div>`;
+            }
+
+            document.getElementById('steps').innerHTML = steps;
+            document.getElementById('result').innerHTML = `
+                <div class="highlight">Encrypted text: ${ciphertext}</div>
+                <p>Original text: ${text}</p>
+            `;
+        }
+
+        function decrypt() {
+            const text = document.getElementById('text').value.replace(/\s/g, '');
+            const rails = parseInt(document.getElementById('rails').value);
+            
+            if (!text || rails < 2 || rails > 10) {
+                alert('Please enter valid text and number of rails (2-10)');
+                return;
+            }
+
+            // Create empty fence
+            let fence = createRailFence(text, rails, false);
+            
+            // Calculate positions
+            let positions = [];
+            let currentRail = 0;
+            let direction = 1;
+            
+            for (let i = 0; i < text.length; i++) {
+                positions.push([currentRail, i]);
+                
+                if (currentRail === 0) direction = 1;
+                if (currentRail === rails - 1) direction = -1;
+                
+                currentRail += direction;
+            }
+
+            // Fill fence with ciphertext
+            let textIndex = 0;
+            for (let rail = 0; rail < rails; rail++) {
+                for (let pos of positions) {
+                    if (pos[0] === rail) {
+                        fence[rail][pos[1]] = text[textIndex++];
+                    }
+                }
+            }
+
+            displayFence(fence);
+
+            // Read off plaintext
+            let plaintext = '';
+            currentRail = 0;
+            direction = 1;
+            
+            for (let i = 0; i < text.length; i++) {
+                plaintext += fence[currentRail][i];
+                
+                if (currentRail === 0) direction = 1;
+                if (currentRail === rails - 1) direction = -1;
+                
+                currentRail += direction;
+            }
+
+            document.getElementById('steps').innerHTML = `
+                <div class="step">Reconstructing the pattern and reading diagonally.</div>
+            `;
+            document.getElementById('result').innerHTML = `
+                <div class="highlight">Decrypted text: ${plaintext}</div>
+                <p>Encrypted text: ${text}</p>
+            `;
+        }
+
+        // Initialize with example
+        window.onload = function() {
+            document.getElementById('text').value = 'HELLO WORLD';
+            showPattern();
+        };
+    </script>
+</body>
+</html>

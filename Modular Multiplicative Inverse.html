@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inverse Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .calculator {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        input[type="number"] {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 120px;
+            margin-right: 10px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
+        }
+        .warning {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+            border: 1px solid #faebcc;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
+        }
+        .hide {
+            display: none;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h2>Inverse Calculator by Dr.Mohammed Tawfik</h2>
+        
+        <div class="input-group">
+            <label>Enter a number: </label>
+            <input type="number" id="number" step="any">
+        </div>
+        
+        <div class="input-group">
+            <label>For modular inverse, enter modulus: </label>
+            <input type="number" id="modulus" step="1">
+        </div>
+        
+        <button onclick="calculateInverses()">Calculate Inverses</button>
+        
+        <div id="multInverseResult" class="result hide"></div>
+        <div id="modInverseResult" class="result hide"></div>
+    </div>
+
+    <script>
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b) {
+                let temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return a;
+        }
+
+        function modInverse(a, m) {
+            a = ((a % m) + m) % m;
+            for(let x = 1; x < m; x++) {
+                if((a * x) % m === 1) {
+                    return x;
+                }
+            }
+            return null;
+        }
+
+        function calculateInverses() {
+            const number = parseFloat(document.getElementById('number').value);
+            const modulus = parseInt(document.getElementById('modulus').value);
+            
+            // Multiplicative Inverse
+            const multInverseDiv = document.getElementById('multInverseResult');
+            multInverseDiv.classList.remove('hide', 'success', 'warning', 'error');
+            
+            if (number === 0) {
+                multInverseDiv.classList.add('error');
+                multInverseDiv.innerHTML = "Multiplicative inverse does not exist for 0";
+            } else {
+                const multInverse = 1 / number;
+                multInverseDiv.classList.add('success');
+                multInverseDiv.innerHTML = `Multiplicative inverse of ${number} is ${multInverse}`;
+                
+                // Verification
+                if (Math.abs(number * multInverse - 1) > 1e-10) {
+                    multInverseDiv.classList.add('warning');
+                    multInverseDiv.innerHTML += "<br>Warning: Possible precision issues with floating-point arithmetic";
+                }
+            }
+            
+            // Modular Multiplicative Inverse
+            const modInverseDiv = document.getElementById('modInverseResult');
+            modInverseDiv.classList.remove('hide', 'success', 'warning', 'error');
+            
+            if (modulus) {
+                if (modulus <= 0) {
+                    modInverseDiv.classList.add('error');
+                    modInverseDiv.innerHTML = "Modulus must be positive";
+                } else if (!Number.isInteger(modulus)) {
+                    modInverseDiv.classList.add('error');
+                    modInverseDiv.innerHTML = "Modulus must be an integer";
+                } else {
+                    const a = Math.round(number); // Convert to integer for modular arithmetic
+                    if (!Number.isInteger(number)) {
+                        modInverseDiv.classList.add('warning');
+                        modInverseDiv.innerHTML = `Warning: Number ${number} was rounded to ${a} for modular arithmetic<br>`;
+                    } else {
+                        modInverseDiv.innerHTML = "";
+                    }
+                    
+                    if (gcd(a, modulus) !== 1) {
+                        modInverseDiv.classList.add('error');
+                        modInverseDiv.innerHTML += `Modular multiplicative inverse does not exist for ${a} (mod ${modulus})`;
+                    } else {
+                        const modInverseResult = modInverse(a, modulus);
+                        if (modInverseResult === null) {
+                            modInverseDiv.classList.add('error');
+                            modInverseDiv.innerHTML += `Could not find modular multiplicative inverse for ${a} (mod ${modulus})`;
+                        } else {
+                            modInverseDiv.classList.add('success');
+                            modInverseDiv.innerHTML += `Modular multiplicative inverse of ${a} mod ${modulus} is ${modInverseResult}`;
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

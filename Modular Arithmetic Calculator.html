@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Modular Arithmetic Calculator - Dr.Mohammed Tawfik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .calculator {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            padding: 10px;
+            border: 2px solid #3498db;
+            border-radius: 4px;
+            width: 150px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #2980b9;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3498db;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #2980b9;
+        }
+        .steps {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f7f9fc;
+            border-radius: 4px;
+            border: 1px solid #e1e8ed;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .author {
+            font-style: italic;
+            color: #7f8c8d;
+            text-align: right;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Modular Arithmetic Calculator</h1>
+        <div class="author">Developed by Dr.Mohammed Tawfik</div>
+    </div>
+
+    <div class="calculator">
+        <div class="input-group">
+            <label>Enter Number (n):</label>
+            <input type="number" id="number" placeholder="-121">
+        </div>
+        
+        <div class="input-group">
+            <label>Enter Modulus (m):</label>
+            <input type="number" id="modulus" placeholder="26" min="1">
+        </div>
+        
+        <button onclick="calculateModular()">Calculate</button>
+        
+        <div id="result" class="result" style="display: none;"></div>
+        <div id="steps" class="steps" style="display: none;"></div>
+        
+        <table id="commonModuli" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Common Moduli</th>
+                    <th>Result</th>
+                    <th>Usage</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        function calculateModular() {
+            const n = parseInt(document.getElementById('number').value);
+            const m = parseInt(document.getElementById('modulus').value);
+            
+            if (!m || m <= 0) {
+                alert("Please enter a positive modulus!");
+                return;
+            }
+
+            // Calculate the result
+            const quotient = Math.floor(n/m);
+            let r = n - (m * quotient);
+            
+            // Make sure remainder is positive
+            while (r < 0) {
+                r += m;
+            }
+            r = ((r % m) + m) % m;  // Ensure result is between 0 and m-1
+
+            // Display result and steps
+            const resultDiv = document.getElementById('result');
+            const stepsDiv = document.getElementById('steps');
+            
+            resultDiv.innerHTML = `
+                <h3>Result:</h3>
+                ${n} ≡ ${r} (mod ${m})
+            `;
+
+            stepsDiv.innerHTML = `
+                <h3>Step by Step Solution:</h3>
+                <div class="step">1. Divide ${n} by ${m}:</div>
+                <div class="step">   ${n} = ${m} × (${quotient}) + ${r}</div>
+                <div class="step">2. The remainder ${r} is the result in modulo ${m}</div>
+                <div class="step">3. Verify: ${r} is between 0 and ${m-1}</div>
+            `;
+
+            // Show common moduli examples
+            const commonModuli = [
+                {m: 2, usage: "Binary/Parity (Even/Odd)"},
+                {m: 7, usage: "Days of the week"},
+                {m: 12, usage: "Months/Hours (AM/PM)"},
+                {m: 24, usage: "Hours (24-hour format)"},
+                {m: 26, usage: "English alphabet (A-Z)"},
+                {m: 60, usage: "Minutes/Seconds"}
+            ];
+
+            const tableBody = document.getElementById('commonModuli').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+            
+            commonModuli.forEach(mod => {
+                let result = n;
+                while (result < 0) result += mod.m;
+                result = ((result % mod.m) + mod.m) % mod.m;
+                
+                const row = tableBody.insertRow();
+                row.insertCell(0).textContent = mod.m;
+                row.insertCell(1).textContent = `${n} ≡ ${result} (mod ${mod.m})`;
+                row.insertCell(2).textContent = mod.usage;
+            });
+
+            // Show all divs
+            resultDiv.style.display = 'block';
+            stepsDiv.style.display = 'block';
+            document.getElementById('commonModuli').style.display = 'table';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vernam Cipher Simulator - Dr. Mohammed Tawfik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 5px;
+        }
+        .input-group {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .result-group {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+        }
+        .binary-display {
+            font-family: monospace;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .xor-step {
+            display: flex;
+            flex-direction: column;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .xor-line {
+            margin: 2px 0;
+            padding: 5px;
+            background-color: #f8f9fa;
+        }
+        button {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #34495e;
+        }
+        input[type="text"], textarea {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .info-box {
+            background-color: #e3f2fd;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border-left: 4px solid #2c3e50;
+        }
+        .author {
+            font-style: italic;
+            color: #666;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .bit {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin: 0 2px;
+            text-align: center;
+            border-radius: 3px;
+        }
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Vernam Cipher (One-Time Pad) Simulator</h1>
+            <div class="author">Developed for Dr. Mohammed Tawfik's Cryptography Course</div>
+        </div>
+
+        <div class="info-box">
+            <h3>About Vernam Cipher:</h3>
+            <p>The Vernam Cipher, also known as the One-Time Pad, is a perfectly secure encryption method when used correctly. It uses a random key that is:</p>
+            <ul>
+                <li>As long as the plaintext</li>
+                <li>Truly random</li>
+                <li>Never reused</li>
+                <li>Kept completely secret</li>
+            </ul>
+            <p>The encryption process uses XOR operations between the plaintext and key bits.</p>
+        </div>
+
+        <div class="input-group">
+            <label for="text">Text to Encrypt/Decrypt:</label><br>
+            <textarea id="text" rows="4" placeholder="Enter text"></textarea>
+        </div>
+
+        <div class="input-group">
+            <button onclick="generateKey()">Generate Random Key</button>
+            <button onclick="useCustomKey()">Use Custom Key</button>
+            <div id="key-display"></div>
+        </div>
+
+        <div class="button-group">
+            <button onclick="encrypt()">Encrypt</button>
+            <button onclick="decrypt()">Decrypt</button>
+            <button onclick="showBinaryTable()">Show/Hide Binary Table</button>
+        </div>
+
+        <div id="binary-table" style="display: none;" class="result-group">
+            <h3>ASCII Binary Table:</h3>
+            <table id="ascii-table">
+                <!-- Table will be filled by JavaScript -->
+            </table>
+        </div>
+
+        <div class="result-group">
+            <h3>Process Steps:</h3>
+            <div id="steps"></div>
+        </div>
+
+        <div class="result-group">
+            <h3>Result:</h3>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentKey = '';
+
+        function textToBinary(text) {
+            return text.split('').map(char => {
+                return char.charCodeAt(0).toString(2).padStart(8, '0');
+            }).join('');
+        }
+
+        function binaryToText(binary) {
+            let bytes = binary.match(/.{1,8}/g);
+            return bytes.map(byte => String.fromCharCode(parseInt(byte, 2))).join('');
+        }
+
+        function generateRandomKey(length) {
+            let key = '';
+            for (let i = 0; i < length; i++) {
+                key += Math.floor(Math.random() * 2);
+            }
+            return key;
+        }
+
+        function xorBinary(a, b) {
+            let result = '';
+            for (let i = 0; i < a.length; i++) {
+                result += a[i] === b[i] ? '0' : '1';
+            }
+            return result;
+        }
+
+        function generateKey() {
+            let text = document.getElementById('text').value;
+            let binaryText = textToBinary(text);
+            currentKey = generateRandomKey(binaryText.length);
+            displayKey();
+        }
+
+        function useCustomKey() {
+            let customKey = prompt("Enter custom binary key (0s and 1s only):");
+            if (customKey && /^[01]+$/.test(customKey)) {
+                currentKey = customKey;
+                displayKey();
+            } else {
+                alert("Invalid binary key! Please use only 0s and 1s.");
+            }
+        }
+
+        function displayKey() {
+            document.getElementById('key-display').innerHTML = `
+                <h4>Current Key (Binary):</h4>
+                <div class="binary-display">${formatBinary(currentKey)}</div>
+            `;
+        }
+
+        function formatBinary(binary) {
+            return binary.match(/.{1,8}/g).join(' ');
+        }
+
+        function processVernam(isEncrypt) {
+            let text = document.getElementById('text').value;
+            if (!text) {
+                alert('Please enter text to process!');
+                return;
+            }
+            if (!currentKey) {
+                alert('Please generate or enter a key first!');
+                return;
+            }
+
+            let binaryText = textToBinary(text);
+            let result = xorBinary(binaryText, currentKey);
+            
+            // Display steps
+            let steps = `
+                <div class="xor-step">
+                    <div class="xor-line">Text (Binary):  ${formatBinary(binaryText)}</div>
+                    <div class="xor-line">Key (Binary):   ${formatBinary(currentKey)}</div>
+                    <div class="xor-line">XOR Result:     ${formatBinary(result)}</div>
+                </div>
+            `;
+            document.getElementById('steps').innerHTML = steps;
+
+            // Display result
+            let resultText = binaryToText(result);
+            document.getElementById('result').innerHTML = `
+                <div class="highlight">
+                    ${isEncrypt ? 'Encrypted' : 'Decrypted'} Text: ${resultText}
+                </div>
+                <div class="binary-display">
+                    Binary Result: ${formatBinary(result)}
+                </div>
+            `;
+        }
+
+        function encrypt() {
+            processVernam(true);
+        }
+
+        function decrypt() {
+            processVernam(false);
+        }
+
+        function showBinaryTable() {
+            let table = document.getElementById('binary-table');
+            if (table.style.display === 'none') {
+                table.style.display = 'block';
+                let html = '<tr><th>Character</th><th>ASCII</th><th>Binary</th></tr>';
+                for (let i = 32; i < 127; i++) {
+                    let char = String.fromCharCode(i);
+                    html += `<tr>
+                        <td>${char}</td>
+                        <td>${i}</td>
+                        <td>${i.toString(2).padStart(8, '0')}</td>
+                    </tr>`;
+                }
+                document.getElementById('ascii-table').innerHTML = html;
+            } else {
+                table.style.display = 'none';
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            document.getElementById('text').value = 'HELLO';
+            generateKey();
+        };
+    </script>
+</body>
+</html>

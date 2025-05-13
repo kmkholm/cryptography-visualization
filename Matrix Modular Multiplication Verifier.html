@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Matrix Modular Multiplication - Dr.Mohammed Tawfik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .calculator {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .matrix-input {
+            display: inline-block;
+            margin: 15px;
+            text-align: center;
+        }
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 60px);
+            gap: 5px;
+            margin: 10px;
+        }
+        input[type="number"] {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 16px;
+            border: 2px solid #3498db;
+            border-radius: 4px;
+        }
+        .matrix-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        button {
+            background-color: #2980b9;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3498db;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #2980b9;
+        }
+        .steps {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f7f9fc;
+            border-radius: 4px;
+            border: 1px solid #e1e8ed;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .matrix-operator {
+            display: inline-block;
+            vertical-align: middle;
+            font-size: 24px;
+            margin: 0 10px;
+        }
+        .verification {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f6f3;
+            border-radius: 4px;
+            border: 1px solid #a3e4d7;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .failure {
+            color: #c0392b;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Matrix Modular Multiplication Verifier</h1>
+        <div class="author">Developed by Dr.Mohammed Tawfik</div>
+    </div>
+
+    <div class="calculator">
+        <div class="matrix-input">
+            <div class="matrix-label">Matrix K</div>
+            <div class="matrix-grid" id="matrixK">
+                <input type="number" value="5">
+                <input type="number" value="8">
+                <input type="number" value="17">
+                <input type="number" value="3">
+            </div>
+        </div>
+
+        <span class="matrix-operator">×</span>
+
+        <div class="matrix-input">
+            <div class="matrix-label">Matrix K⁻¹</div>
+            <div class="matrix-grid" id="matrixKInv">
+                <input type="number" value="9">
+                <input type="number" value="2">
+                <input type="number" value="1">
+                <input type="number" value="15">
+            </div>
+        </div>
+
+        <span class="matrix-operator">mod</span>
+        
+        <div class="matrix-input">
+            <div class="matrix-label">Modulus</div>
+            <input type="number" id="modulus" value="26" style="width: 70px;">
+        </div>
+
+        <div>
+            <button onclick="calculateModularMultiplication()">Verify Multiplication</button>
+        </div>
+
+        <div id="result" class="result" style="display: none;"></div>
+        <div id="steps" class="steps" style="display: none;"></div>
+        <div id="verification" class="verification" style="display: none;"></div>
+    </div>
+
+    <script>
+        function mod(n, m) {
+            return ((n % m) + m) % m;
+        }
+
+        function getMatrixValues(matrixId) {
+            const inputs = document.querySelectorAll(`#${matrixId} input`);
+            return [
+                [parseInt(inputs[0].value), parseInt(inputs[1].value)],
+                [parseInt(inputs[2].value), parseInt(inputs[3].value)]
+            ];
+        }
+
+        function matrixMultiply(A, B, modulus) {
+            const result = [
+                [0, 0],
+                [0, 0]
+            ];
+            const steps = [];
+
+            for (let i = 0; i < 2; i++) {
+                for (let j = 0; j < 2; j++) {
+                    let sum = 0;
+                    let stepStr = `C[${i},${j}] = `;
+                    for (let k = 0; k < 2; k++) {
+                        sum += A[i][k] * B[k][j];
+                        stepStr += `${k > 0 ? ' + ' : ''}(${A[i][k]} × ${B[k][j]})`;
+                    }
+                    stepStr += ` = ${sum}`;
+                    result[i][j] = mod(sum, modulus);
+                    stepStr += ` ≡ ${result[i][j]} (mod ${modulus})`;
+                    steps.push(stepStr);
+                }
+            }
+
+            return { result, steps };
+        }
+
+        function calculateModularMultiplication() {
+            const K = getMatrixValues('matrixK');
+            const KInv = getMatrixValues('matrixKInv');
+            const modulus = parseInt(document.getElementById('modulus').value);
+
+            const { result, steps } = matrixMultiply(K, KInv, modulus);
+
+            // Display steps
+            const stepsDiv = document.getElementById('steps');
+            stepsDiv.innerHTML = `
+                <h3>Step by Step Calculation:</h3>
+                ${steps.map(step => `<div class="step">${step}</div>`).join('')}
+            `;
+
+            // Display result
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `
+                <h3>Result Matrix:</h3>
+                <div class="matrix-grid" style="margin: 0 auto;">
+                    <div>${result[0][0]}</div>
+                    <div>${result[0][1]}</div>
+                    <div>${result[1][0]}</div>
+                    <div>${result[1][1]}</div>
+                </div>
+            `;
+
+            // Verify if result is identity matrix
+            const isIdentity = result[0][0] === 1 && result[0][1] === 0 && 
+                             result[1][0] === 0 && result[1][1] === 1;
+
+            const verificationDiv = document.getElementById('verification');
+            verificationDiv.innerHTML = isIdentity 
+                ? '<div class="success">✓ Verification Successful: K × K⁻¹ ≡ I (mod ' + modulus + ')</div>'
+                : '<div class="failure">✗ Verification Failed: K × K⁻¹ ≢ I (mod ' + modulus + ')</div>';
+
+            // Show all divs
+            resultDiv.style.display = 'block';
+            stepsDiv.style.display = 'block';
+            verificationDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

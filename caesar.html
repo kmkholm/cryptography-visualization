@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html dir="ltr">
+<head>
+    <title>Dr. Mohammed Tawfik's Caesar Cipher Simulator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        .simulation {
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f5f5f5;
+        }
+        .highlight {
+            background-color: #ffeb3b;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dr. Mohammed Tawfik's Caesar Cipher Simulator</h1>
+        
+        <div class="input-group">
+            <label for="input-text">Text to encrypt/decrypt:</label><br>
+            <textarea id="input-text" rows="4" style="width: 100%"></textarea>
+        </div>
+
+        <div class="input-group">
+            <label for="shift">Shift amount (0-25):</label>
+            <input type="number" id="shift" min="0" max="25" value="3">
+        </div>
+
+        <button onclick="encrypt()">Encrypt</button>
+        <button onclick="decrypt()">Decrypt</button>
+
+        <div class="simulation">
+            <h3>Simulation Table</h3>
+            <div id="alphabet-table"></div>
+        </div>
+
+        <div class="result">
+            <h3>Result:</h3>
+            <p id="result-text"></p>
+        </div>
+
+        <div class="simulation">
+            <h3>Simulation Details:</h3>
+            <div id="simulation-details"></div>
+        </div>
+    </div>
+
+    <script>
+        // Create alphabet table
+        function createAlphabetTable(shift) {
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let shiftedAlphabet = alphabet.slice(shift) + alphabet.slice(0, shift);
+            
+            let table = '<table>';
+            table += '<tr><th>Original Letter</th>';
+            for (let char of alphabet) {
+                table += `<td>${char}</td>`;
+            }
+            table += '</tr>';
+            
+            table += '<tr><th>Encrypted Letter</th>';
+            for (let char of shiftedAlphabet) {
+                table += `<td>${char}</td>`;
+            }
+            table += '</tr>';
+            
+            table += '<tr><th>Numeric Value</th>';
+            for (let i = 0; i < 26; i++) {
+                table += `<td>${i}</td>`;
+            }
+            table += '</tr>';
+            
+            table += '</table>';
+            document.getElementById('alphabet-table').innerHTML = table;
+        }
+
+        // Caesar cipher function
+        function caesarCipher(text, shift, encrypt = true) {
+            if (!encrypt) shift = (26 - shift) % 26;
+            let result = '';
+            let details = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                let char = text[i].toUpperCase();
+                if (char >= 'A' && char <= 'Z') {
+                    let code = char.charCodeAt(0) - 65;  // Start from 0
+                    let shifted = (code + shift) % 26;
+                    let newChar = String.fromCharCode(shifted + 65);
+                    
+                    details += `<p>Letter "${char}" (${code}) → "${newChar}" (${shifted})</p>`;
+                    result += newChar;
+                } else {
+                    result += text[i];
+                    details += `<p>Character "${text[i]}" (unchanged)</p>`;
+                }
+            }
+            
+            document.getElementById('simulation-details').innerHTML = details;
+            return result;
+        }
+
+        // Encryption function
+        function encrypt() {
+            const text = document.getElementById('input-text').value;
+            const shift = parseInt(document.getElementById('shift').value);
+            createAlphabetTable(shift);
+            const encrypted = caesarCipher(text, shift, true);
+            document.getElementById('result-text').textContent = encrypted;
+        }
+
+        // Decryption function
+        function decrypt() {
+            const text = document.getElementById('input-text').value;
+            const shift = parseInt(document.getElementById('shift').value);
+            createAlphabetTable(26 - shift);
+            const decrypted = caesarCipher(text, shift, false);
+            document.getElementById('result-text').textContent = decrypted;
+        }
+
+        // Initialize page
+        window.onload = function() {
+            createAlphabetTable(3);
+        };
+    </script>
+</body>
+</html>

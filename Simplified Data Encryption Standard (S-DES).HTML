@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete S-DES Simulator - Dr. Mohammed Tawfik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, #4299e1, #2b6cb0);
+            color: white;
+            border-radius: 8px;
+        }
+        .author {
+            font-size: 1.2em;
+            color: #f0f0f0;
+            margin-top: 10px;
+        }
+        .university {
+            font-size: 1em;
+            color: #e0e0e0;
+            margin-top: 5px;
+        }
+        .input-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .permutation-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .permutation-input {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .step-box {
+            margin: 15px 0;
+            padding: 20px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .step-title {
+            font-weight: bold;
+            color: #2c5282;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+        }
+        .step-content {
+            font-family: monospace;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            line-height: 1.8;
+        }
+        .explanation {
+            background: #f0fff4;
+            padding: 10px;
+            margin-top: 10px;
+            border-left: 4px solid #48bb78;
+            border-radius: 4px;
+        }
+        .sbox-table {
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-family: monospace;
+            width: 100%;
+        }
+        .sbox-table th, .sbox-table td {
+            border: 1px solid #cbd5e0;
+            padding: 6px 10px;
+            text-align: center;
+        }
+        .sbox-table th {
+            background-color: #4299e1;
+            color: white;
+        }
+        .sbox-container {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 4px;
+        }
+        .permutation-display {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+            align-items: center;
+            justify-content: center;
+        }
+        .bit-box {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #cbd5e0;
+            text-align: center;
+            line-height: 30px;
+            margin: 2px;
+            background: #f7fafc;
+            font-family: monospace;
+            position: relative;
+        }
+        .bit-box sub {
+            position: absolute;
+            bottom: -10px;
+            right: 0;
+            font-size: 10px;
+        }
+        .bit-arrow {
+            display: inline-block;
+            font-size: 20px;
+            margin: 0 5px;
+            color: #4299e1;
+        }
+        .operation-step {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .xor-operation {
+            display: grid;
+            grid-template-columns: repeat(8, 30px);
+            gap: 2px;
+            margin: 10px 0;
+            justify-content: center;
+        }
+        .xor-cell {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #cbd5e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #4299e1;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #3182ce;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #4a5568;
+            font-weight: bold;
+        }
+        .tab.active {
+            color: #4299e1;
+            border-bottom: 2px solid #4299e1;
+            margin-bottom: -2px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://eramresearchcenter.tech/t.jpeg" alt="Logo" style="width: 100px; height: 100px; border-radius: 50%; margin-bottom: 10px;">
+            <h1>Complete S-DES Simulator</h1>
+            <div class="author">Dr. Mohammed Tawfik</div>
+            <div class="university">Ajloun National University</div>
+            <div class="contact" style="font-size: 1em; color: #e0e0e0; margin-top: 5px;">kmkhol01@gmail.com</div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('config')">Configuration</button>
+            <button class="tab" onclick="showTab('keyGen')">Key Generation</button>
+            <button class="tab" onclick="showTab('encryption')">Encryption</button>
+        </div>
+
+        <div id="config" class="tab-content active">
+            <div class="input-section">
+                <h2>Permutation Configuration</h2>
+                <div class="permutation-section">
+                    <div class="permutation-input">
+                        <label>P10 Permutation:</label>
+                        <input type="text" id="p10_input" placeholder="3,5,2,7,4,10,1,9,8,6">
+                    </div>
+                    <div class="permutation-input">
+                        <label>P8 Permutation:</label>
+                        <input type="text" id="p8_input" placeholder="6,3,7,4,8,5,10,9">
+                    </div>
+                    <div class="permutation-input">
+                        <label>P4 Permutation:</label>
+                        <input type="text" id="p4_input" placeholder="2,4,3,1">
+                    </div>
+                    <div class="permutation-input">
+                        <label>IP Permutation:</label>
+                        <input type="text" id="ip_input" placeholder="2,6,3,1,4,8,5,7">
+                    </div>
+                    <div class="permutation-input">
+                        <label>IP⁻¹ Permutation:</label>
+                        <input type="text" id="ip_inverse_input" placeholder="4,1,3,5,7,2,8,6">
+                    </div>
+                    <div class="permutation-input">
+                        <label>EP Permutation:</label>
+                        <input type="text" id="ep_input" placeholder="4,1,2,3,2,3,4,1">
+                    </div>
+                </div>
+                <button onclick="initializePermutations()">Initialize Permutations</button>
+                <button onclick="generateRandomPermutations()">Generate Random Permutations</button>
+            </div>
+        </div>
+
+        <div id="keyGen" class="tab-content">
+            <div class="input-section">
+                <h2>Key Generation</h2>
+                <div class="input-group">
+                    <label>10-bit Key:</label>
+                    <input type="text" id="initial_key" maxlength="10" placeholder="Enter 10-bit key">
+                    <button onclick="generateRandomKey()">Generate Random Key</button>
+                </div>
+                <button onclick="generateKeys()">Generate Subkeys</button>
+            </div>
+            <div id="key-generation-steps"></div>
+        </div>
+
+        <div id="encryption" class="tab-content">
+            <div class="input-section">
+                <h2>Encryption Process</h2>
+                <div class="input-group">
+                    <label>Plaintext (8 bits):</label>
+                    <input type="text" id="plaintext" maxlength="8" placeholder="Enter 8-bit plaintext">
+                    <button onclick="generateRandomPlaintext()">Generate Random Plaintext</button>
+                </div>
+                <div class="input-group">
+                    <label>Key 1:</label>
+                    <input type="text" id="key1" maxlength="8" readonly>
+                </div>
+                <div class="input-group">
+                    <label>Key 2:</label>
+                    <input type="text" id="key2" maxlength="8" readonly>
+                </div>
+                <button onclick="performEncryption()">Perform Encryption</button>
+            </div>
+            <div id="encryption-steps"></div>
+        </div>
+    </div>
+
+    <script>
+        let P10, P8, P4, IP, IP_INVERSE, EP;
+        let generatedK1 = '', generatedK2 = '';
+
+        const S0 = [
+            ['01', '00', '11', '10'],
+            ['11', '10', '01', '00'],
+            ['00', '10', '01', '11'],
+            ['11', '01', '11', '10']
+        ];
+
+        const S1 = [
+            ['00', '01', '10', '11'],
+            ['10', '00', '01', '11'],
+            ['11', '00', '01', '00'],
+            ['10', '01', '00', '11']
+        ];
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function validatePermutation(input, length) {
+            const numbers = input.split(',').map(n => parseInt(n.trim()));
+            if (numbers.length !== length) return false;
+            const valid = numbers.every(n => n > 0 && n <= length);
+            const unique = new Set(numbers).size === length;
+            return valid && unique;
+        }
+
+        function initializePermutations() {
+            const p10Input = document.getElementById('p10_input').value;
+            const p8Input = document.getElementById('p8_input').value;
+            const p4Input = document.getElementById('p4_input').value;
+            const ipInput = document.getElementById('ip_input').value;
+            const ipInverseInput = document.getElementById('ip_inverse_input').value;
+            const epInput = document.getElementById('ep_input').value;
+
+            try {
+                if (!validatePermutation(p10Input, 10)) throw new Error('Invalid P10 permutation');
+                if (!validatePermutation(p8Input, 8)) throw new Error('Invalid P8 permutation');
+                if (!validatePermutation(p4Input, 4)) throw new Error('Invalid P4 permutation');
+                if (!validatePermutation(ipInput, 8)) throw new Error('Invalid IP permutation');
+                if (!validatePermutation(ipInverseInput, 8)) throw new Error('Invalid IP⁻¹ permutation');
+                // Note: EP can repeat numbers, so we don't validate uniqueness
+                const epNumbers = epInput.split(',').map(n => parseInt(n.trim()));
+                if (epNumbers.length !== 8 || !epNumbers.every(n => n > 0 && n <= 4)) {
+                    throw new Error('Invalid EP permutation');
+                }
+
+                P10 = p10Input.split(',').map(n => parseInt(n.trim()));
+                P8 = p8Input.split(',').map(n => parseInt(n.trim()));
+                P4 = p4Input.split(',').map(n => parseInt(n.trim()));
+                IP = ipInput.split(',').map(n => parseInt(n.trim()));
+                IP_INVERSE = ipInverseInput.split(',').map(n => parseInt(n.trim()));
+                EP = epInput.split(',').map(n => parseInt(n.trim()));
+
+                alert('Permutations initialized successfully!');
+                showTab('keyGen');
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        function generateRandomPermutation(length) {
+            const array = Array.from({length}, (_, i) => i + 1);
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function generateRandomPermutations() {
+            document.getElementById('p10_input').value = generateRandomPermutation(10).join(',');
+            document.getElementById('p8_input').value = generateRandomPermutation(8).join(',');
+            document.getElementById('p4_input').value = generateRandomPermutation(4).join(',');
+            document.getElementById('ip_input').value = generateRandomPermutation(8).join(',');
+            document.getElementById('ip_inverse_input').value = generateRandomPermutation(8).join(',');
+            
+            // For EP, we need numbers 1-4 repeated appropriately
+            const epArray = [4,1,2,3,2,3,4,1];
+            document.getElementById('ep_input').value = epArray.join(',');
+        }
+
+        function generateRandomKey() {
+            const key = Array(10).fill().map(() => Math.round(Math.random())).join('');
+            document.getElementById('initial_key').value = key;
+        }
+
+        function generateRandomPlaintext() {
+            const plaintext = Array(8).fill().map(() => Math.round(Math.random())).join('');
+            document.getElementById('plaintext').value = plaintext;
+        }
+
+        function displayPermutation(input, permutation, title) {
+            let html = `<div class="operation-step">
+                <strong>${title}:</strong><br>
+                <div class="permutation-display">`;
+            
+            // Input bits
+            html += '<div class="bit-sequence">';
+            for(let i = 0; i < input.length; i++) {
+                html += `<div class="bit-box">${input[i]}<sub>${i+1}</sub></div>`;
+            }
+            html += '</div>';
+            
+            html += '<div class="bit-arrow">→</div>';
+            
+            // Output bits
+            html += '<div class="bit-sequence">';
+            for(let i = 0; i < permutation.length; i++) {
+                const pos = permutation[i] - 1;
+                html += `<div class="bit-box">${input[pos]}<sub>${i+1}</sub></div>`;
+            }
+            html += '</div></div></div>';
+            
+            return html;
+        }
+
+        function displaySBoxTable(boxNumber, sbox, input, row, col, output) {
+            let html = `<div class="sbox-container">
+                <h4>S-Box ${boxNumber}</h4>
+                <table class="sbox-table">
+                    <tr>
+                        <th>Row/Col</th>
+                        <th>00</th>
+                        <th>01</th>
+                        <th>10</th>
+                        <th>11</th>
+                    </tr>`;
+            
+            for(let i = 0; i < sbox.length; i++) {
+                html += `<tr>
+                    <th>${i.toString(2).padStart(2, '0')}</th>`;
+                for(let j = 0; j < sbox[i].length; j++) {
+                    let cellClass = (i === row && j === col) ? 'background-color: #4299e1; color: white;' : '';
+                    html += `<td style="${cellClass}">${sbox[i][j]}</td>`;
+                }
+                html += '</tr>';
+            }
+            html += `</table>
+                <div class="operation-step">
+                    Input: ${input}<br>
+                    Row (${input[0]}${input[3]}) = ${row} (${row.toString(2).padStart(2, '0')})<br>
+                    Column (${input[1]}${input[2]}) = ${col} (${col.toString(2).padStart(2, '0')})<br>
+                    Output: ${output}
+                </div>
+            </div>`;
+            return html;
+        }
+
+        function permute(input, permutation, title = 'Permutation') {
+            let result = '';
+            for(let i = 0; i < permutation.length; i++) {
+                const pos = permutation[i] - 1;
+                result += input[pos];
+            }
+            
+            const explanation = displayPermutation(input, permutation, title);
+            return { result, explanation };
+        }
+
+        function leftShift(input) {
+            return input.slice(1) + input[0];
+        }
+
+        function createStepBox(title, content, explanation = '') {
+            return `
+                <div class="step-box">
+                    <div class="step-title">${title}</div>
+                    <div class="step-content">${content}</div>
+                    ${explanation ? `<div class="explanation">${explanation}</div>` : ''}
+                </div>
+            `;
+        }
+
+        function displayXOROperation(a, b, result) {
+            let html = `<div class="operation-step">
+                <div class="xor-operation">`;
+            
+            // First operand
+            for(let i = 0; i < a.length; i++) {
+                html += `<div class="xor-cell">${a[i]}</div>`;
+            }
+            
+            // XOR symbol row
+            html += '</div>⊕<div class="xor-operation">';
+            
+            // Second operand
+            for(let i = 0; i < b.length; i++) {
+                html += `<div class="xor-cell">${b[i]}</div>`;
+            }
+            
+            // Result row
+            html += '</div>=<div class="xor-operation">';
+            
+            // Result
+            for(let i = 0; i < result.length; i++) {
+                html += `<div class="xor-cell">${result[i]}</div>`;
+            }
+            
+            html += '</div></div>';
+            return html;
+        }
+
+        function xor(a, b) {
+            let result = '';
+            for(let i = 0; i < a.length; i++) {
+                result += a[i] === b[i] ? '0' : '1';
+            }
+            return { 
+                result, 
+                explanation: displayXOROperation(a, b, result)
+            };
+        }
+
+        function sBox(input, boxNumber) {
+            const row = parseInt(input[0] + input[3], 2);
+            const col = parseInt(input[1] + input[2], 2);
+            const sbox = boxNumber === 0 ? S0 : S1;
+            const result = sbox[row][col];
+            
+            const explanation = displaySBoxTable(boxNumber, sbox, input, row, col, result);
+            return { result, explanation };
+        }
+
+        function generateKeys() {
+            if (!P10 || !P8) {
+                alert('Please initialize permutations first!');
+                return;
+            }
+
+            const initialKey = document.getElementById('initial_key').value;
+            if (!/^[01]{10}$/.test(initialKey)) {
+                alert('Please enter a valid 10-bit key (0s and 1s only)');
+                return;
+            }
+
+            const stepsDiv = document.getElementById('key-generation-steps');
+            stepsDiv.innerHTML = '';
+
+            // P10 Permutation
+            const p10Result = permute(initialKey, P10, 'P10 Permutation');
+            stepsDiv.innerHTML += createStepBox(
+                'Step 1: P10 Permutation',
+                `Initial Key: ${initialKey}<br>${p10Result.explanation}`,
+                'Permuting the initial 10-bit key'
+            );
+
+            // Split and LS-1
+            const [left1, right1] = [p10Result.result.slice(0, 5), p10Result.result.slice(5)];
+            const ls1Left = leftShift(left1);
+            const ls1Right = leftShift(right1);
+            stepsDiv.innerHTML += createStepBox(
+                'Step 2: Split and LS-1',
+                `Split:<br>
+                Left Half: ${left1} → ${ls1Left} (LS-1)<br>
+                Right Half: ${right1} → ${ls1Right} (LS-1)`,
+                'Left shift of 1 position on both halves'
+            );
+
+            // Generate K1
+            const k1Result = permute(ls1Left + ls1Right, P8, 'P8 Permutation for K1');
+            generatedK1 = k1Result.result;
+            document.getElementById('key1').value = generatedK1;
+            stepsDiv.innerHTML += createStepBox(
+                'Step 3: Generate K1 (P8)',
+                `Combined: ${ls1Left + ls1Right}<br>${k1Result.explanation}`,
+                'Generating K1 using P8 permutation'
+            );
+
+            // LS-2
+            const ls2Left = leftShift(leftShift(ls1Left));
+            const ls2Right = leftShift(leftShift(ls1Right));
+            stepsDiv.innerHTML += createStepBox(
+                'Step 4: LS-2',
+                `Left Half: ${ls1Left} → ${ls2Left}<br>
+                Right Half: ${ls1Right} → ${ls2Right}`,
+                'Left shift of 2 positions on both halves'
+            );
+
+            // Generate K2
+            const k2Result = permute(ls2Left + ls2Right, P8, 'P8 Permutation for K2');
+            generatedK2 = k2Result.result;
+            document.getElementById('key2').value = generatedK2;
+            stepsDiv.innerHTML += createStepBox(
+                'Step 5: Generate K2 (P8)',
+                `Combined: ${ls2Left + ls2Right}<br>${k2Result.explanation}`,
+                'Generating K2 using P8 permutation'
+            );
+
+            showTab('encryption');
+        }
+
+        function performEncryption() {
+            if (!IP || !IP_INVERSE || !EP || !P4) {
+                alert('Please initialize all permutations first!');
+                return;
+            }
+
+            const plaintext = document.getElementById('plaintext').value;
+            if (!/^[01]{8}$/.test(plaintext)) {
+                alert('Please enter a valid 8-bit plaintext');
+                return;
+            }
+
+            if (!generatedK1 || !generatedK2) {
+                alert('Please generate keys first!');
+                return;
+            }
+
+            const stepsDiv = document.getElementById('encryption-steps');
+            stepsDiv.innerHTML = '';
+
+            // Initial Permutation
+            const ipResult = permute(plaintext, IP, 'Initial Permutation (IP)');
+            stepsDiv.innerHTML += createStepBox(
+                'Step 1: Initial Permutation (IP)',
+                `Plaintext: ${plaintext}<br>${ipResult.explanation}`,
+                'Initial permutation of plaintext'
+            );
+
+            // First Round
+            let [left1, right1] = [ipResult.result.slice(0, 4), ipResult.result.slice(4)];
+            
+            // Expansion
+            const ep1Result = permute(right1, EP, 'Expansion Permutation (EP)');
+            
+            // XOR with K1
+            const xor1Result = xor(ep1Result.result, generatedK1);
+            
+            // S-Box operations
+            const s0Input1 = xor1Result.result.slice(0, 4);
+            const s1Input1 = xor1Result.result.slice(4);
+            const s0Result1 = sBox(s0Input1, 0);
+            const s1Result1 = sBox(s1Input1, 1);
+            
+            // P4 permutation
+            const p4Result1 = permute(s0Result1.result + s1Result1.result, P4, 'P4 Permutation');
+            
+            // XOR with left half
+            const xorWithLeft1 = xor(left1, p4Result1.result);
+            
+            stepsDiv.innerHTML += createStepBox(
+                'Step 2: First Round',
+                `Split:<br>L1: ${left1}, R1: ${right1}<br><br>` +
+                `Expansion (EP): ${ep1Result.explanation}<br><br>` +
+                `XOR with K1 (${generatedK1}): ${xor1Result.explanation}<br><br>` +
+                `S-Box Operations:<br>` +
+                `${s0Result1.explanation}${s1Result1.explanation}<br>` +
+                `P4 Permutation: ${p4Result1.explanation}<br>` +
+                `XOR with L1: ${xorWithLeft1.explanation}<br>` +
+                `Round 1 Output: ${right1 + xorWithLeft1.result}`,
+                'First round of encryption'
+            );
+
+            // Second Round
+            let [left2, right2] = [right1, xorWithLeft1.result];
+            
+            // Expansion
+            const ep2Result = permute(right2, EP, 'Expansion Permutation (EP)');
+            
+            // XOR with K2
+            const xor2Result = xor(ep2Result.result, generatedK2);
+            
+            // S-Box operations
+            const s0Input2 = xor2Result.result.slice(0, 4);
+            const s1Input2 = xor2Result.result.slice(4);
+            const s0Result2 = sBox(s0Input2, 0);
+            const s1Result2 = sBox(s1Input2, 1);
+            
+            // P4 permutation
+            const p4Result2 = permute(s0Result2.result + s1Result2.result, P4, 'P4 Permutation');
+            
+            // XOR with left half
+            const xorWithLeft2 = xor(left2, p4Result2.result);
+            
+            stepsDiv.innerHTML += createStepBox(
+                'Step 3: Second Round',
+                `Split:<br>L2: ${left2}, R2: ${right2}<br><br>` +
+                `Expansion (EP): ${ep2Result.explanation}<br><br>` +
+                `XOR with K2 (${generatedK2}): ${xor2Result.explanation}<br><br>` +
+                `S-Box Operations:<br>` +
+                `${s0Result2.explanation}${s1Result2.explanation}<br>` +
+                `P4 Permutation: ${p4Result2.explanation}<br>` +
+                `XOR with L2: ${xorWithLeft2.explanation}<br>` +
+                `Round 2 Output: ${xorWithLeft2.result + right2}`,
+                'Second round of encryption'
+            );
+
+            // Final Permutation
+            const finalInput = xorWithLeft2.result + right2;
+            const finalResult = permute(finalInput, IP_INVERSE, 'Final Permutation (IP⁻¹)');
+            
+            stepsDiv.innerHTML += createStepBox(
+                'Step 4: Final Permutation (IP⁻¹)',
+                `Input: ${finalInput}<br>${finalResult.explanation}`,
+                'Final permutation to get ciphertext'
+            );
+
+            // Final Summary
+            stepsDiv.innerHTML += createStepBox(
+                'Encryption Summary',
+                `Initial plaintext: ${plaintext}<br>
+                Key 1: ${generatedK1}<br>
+                Key 2: ${generatedK2}<br>
+                Final ciphertext: ${finalResult.result}`,
+                'S-DES encryption completed successfully!'
+            );
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            document.getElementById('p10_input').value = '3,5,2,7,4,10,1,9,8,6';
+            document.getElementById('p8_input').value = '6,3,7,4,8,5,10,9';
+            document.getElementById('p4_input').value = '2,4,3,1';
+            document.getElementById('ip_input').value = '2,6,3,1,4,8,5,7';
+            document.getElementById('ip_inverse_input').value = '4,1,3,5,7,2,8,6';
+            document.getElementById('ep_input').value = '4,1,2,3,2,3,4,1';
+            generateRandomKey();
+            generateRandomPlaintext();
+        };
+    </script>
+</body>
+</html>

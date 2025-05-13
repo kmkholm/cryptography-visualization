@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ECC Simulator - Dr. Mohammed Tawfik</title>
+    <!-- Include Plotly.js for curve visualization -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #9b59b6;
+            --success-color: #27ae60;
+            --warning-color: #f1c40f;
+            --info-color: #3498db;
+            --light-bg: #ecf0f1;
+            --dark-bg: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f6fa;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .curve-params {
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid var(--accent-color);
+        }
+
+        .visualization {
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .point-operations {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .math-box {
+            font-family: 'Computer Modern', serif;
+            background-color: #fafafa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent-color), #8e44ad);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        input[type="number"] {
+            width: 80px;
+            padding: 8px;
+            margin: 5px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .info-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .point {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: var(--light-bg);
+            border-radius: 5px;
+            margin: 5px;
+            font-family: monospace;
+        }
+
+        .step-box {
+            margin: 10px 0;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+            transition: transform 0.2s;
+        }
+
+        .step-box:hover {
+            transform: translateX(5px);
+        }
+
+        .tabs {
+            display: flex;
+            margin: 20px 0;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: none;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .tab.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            animation: slideIn 0.5s ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .plot-container {
+            height: 500px;
+            margin: 20px 0;
+        }
+
+        .key-exchange {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .participant {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid var(--accent-color);
+        }
+
+        @media (max-width: 1200px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .key-exchange {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Elliptic Curve Cryptography Simulator</h1>
+            <div class="author">Developed for Dr. Mohammed Tawfik's Cryptography Course</div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('curve')">Curve Basics</button>
+            <button class="tab" onclick="switchTab('operations')">Point Operations</button>
+            <button class="tab" onclick="switchTab('ecdh')">ECDH Key Exchange</button>
+            <button class="tab" onclick="switchTab('ecdsa')">ECDSA Signatures</button>
+        </div>
+
+        <div id="curve" class="tab-content active">
+            <div class="grid">
+                <div class="curve-params">
+                    <h3>Curve Parameters</h3>
+                    <div class="math-box">
+                        <p>y² = x³ + ax + b (mod p)</p>
+                        <p>a: <input type="number" id="param-a" value="0"></p>
+                        <p>b: <input type="number" id="param-b" value="7"></p>
+                        <p>p: <input type="number" id="param-p" value="97"></p>
+                    </div>
+                    <button onclick="updateCurve()">Update Curve</button>
+                    <button onclick="showPoints()">Show All Points</button>
+                </div>
+                <div class="visualization">
+                    <div id="curve-plot" class="plot-container"></div>
+                </div>
+            </div>
+            <div class="info-box">
+                <h3>Points on Curve:</h3>
+                <div id="curve-points"></div>
+            </div>
+        </div>
+
+        <div id="operations" class="tab-content">
+            <div class="point-operations">
+                <h3>Point Addition</h3>
+                <div class="math-box">
+                    <p>Point 1: <input type="text" id="point1" placeholder="x,y"></p>
+                    <p>Point 2: <input type="text" id="point2" placeholder="x,y"></p>
+                    <button onclick="addPoints()">Add Points</button>
+                    <div id="addition-result"></div>
+                </div>
+
+                <h3>Scalar Multiplication</h3>
+                <div class="math-box">
+                    <p>Point: <input type="text" id="base-point" placeholder="x,y"></p>
+                    <p>Scalar: <input type="number" id="scalar" min="1"></p>
+                    <button onclick="scalarMultiply()">Multiply</button>
+                    <div id="multiplication-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ecdh" class="tab-content">
+            <div class="key-exchange">
+                <div class="participant">
+                    <h3>Alice</h3>
+                    <div class="math-box">
+                        <p>Private Key: <input type="number" id="alice-private" min="1"></p>
+                        <p>Public Key: <span id="alice-public"></span></p>
+                    </div>
+                </div>
+                <div class="participant">
+                    <h3>Bob</h3>
+                    <div class="math-box">
+                        <p>Private Key: <input type="number" id="bob-private" min="1"></p>
+                        <p>Public Key: <span id="bob-public"></span></p>
+                    </div>
+                </div>
+            </div>
+            <button onclick="performECDH()">Perform Key Exchange</button>
+            <div id="ecdh-result" class="info-box"></div>
+        </div>
+
+        <div id="ecdsa" class="tab-content">
+            <div class="grid">
+                <div class="math-box">
+                    <h3>Sign Message</h3>
+                    <p>Message: <input type="text" id="message" placeholder="Enter message"></p>
+                    <p>Private Key: <input type="number" id="signing-key" min="1"></p>
+                    <button onclick="signMessage()">Sign</button>
+                    <div id="signature-result"></div>
+                </div>
+                <div class="math-box">
+                    <h3>Verify Signature</h3>
+                    <div id="verification-area"></div>
+                    <button onclick="verifySignature()">Verify</button>
+                    <div id="verification-result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial curve parameters
+        let curveParams = {
+            a: 0,
+            b: 7,
+            p: 97
+        };
+
+        // Current curve points
+        let curvePoints = [];
+        
+        // Base point for operations
+        let basePoint = null;
+
+        function modInverse(a, m) {
+            a = ((a % m) + m) % m;
+            for(let x = 1; x < m; x++) {
+                if((a * x) % m === 1) return x;
+            }
+            return null;
+        }
+
+        function isQuadraticResidue(n, p) {
+            return modPow(n, (p - 1) / 2, p) === 1;
+        }
+
+        function modPow(base, exponent, modulus) {
+            if(modulus === 1) return 0;
+            let result = 1;
+            base = base % modulus;
+            while(exponent > 0) {
+                if(exponent % 2 === 1) {
+                    result = (result * base) % modulus;
+                }
+                base = (base * base) % modulus;
+                exponent = Math.floor(exponent / 2);
+            }
+            return result;
+        }
+
+        function modSqrt(n, p) {
+            if(p % 4 === 3) {
+                return modPow(n, (p + 1) / 4, p);
+            }
+            // Implement Tonelli-Shanks for p % 4 !== 3
+            return null;
+        }
+
+        function findPoints() {
+            const { a, b, p } = curveParams;
+            let points = [];
+            
+            // Add point at infinity
+            points.push('O');
+
+            for(let x = 0; x < p; x++) {
+                // Calculate right side of equation
+                let rhs = (modPow(x, 3, p) + a * x + b) % p;
+                
+                if(isQuadraticResidue(rhs, p)) {
+                    let y = modSqrt(rhs, p);
+                    if(y !== null) {
+                        points.push(`(${x},${y})`);
+                        if(y !== 0) points.push(`(${x},${(p-y)%p})`);
+                    }
+                }
+            }
+            
+            curvePoints = points;
+            return points;
+        }
+
+        function plotCurve() {
+            const { a, b, p } = curveParams;
+            let xValues = [];
+            let yValues = [];
+            
+            curvePoints.forEach(point => {
+                if(point !== 'O') {
+                    let [x, y] = point.slice(1,-1).split(',').map(Number);
+                    xValues.push(x);
+                    yValues.push(y);
+                }
+            });
+
+            let trace = {
+                x: xValues,
+                y: yValues,
+                mode: 'markers',
+                type: 'scatter',
+                marker: {
+                    size: 10,
+                    color: 'purple'
+                },
+                name: 'Curve Points'
+            };
+
+            let layout = {
+                title: 'Elliptic Curve Points',
+                xaxis: {
+                    title: 'x',
+                    range: [-1, p]
+                },
+                yaxis: {
+                    title: 'y',
+                    range: [-1, p]
+                }
+            };
+
+            Plotly.newPlot('curve-plot', [trace], layout);
+        }
+
+        function updateCurve() {
+            curveParams.a = parseInt(document.getElementById('param-a').value);
+            curveParams.b = parseInt(document.getElementById('param-b').value);
+            curveParams.p = parseInt(document.getElementById('param-p').value);
+            
+            findPoints();
+            plotCurve();
+            showPoints();
+        }
+
+        function showPoints() {
+            let pointsDiv = document.getElementById('curve-points');
+            pointsDiv.innerHTML = curvePoints.map(point => 
+                `<span class="point">${point}</span>`
+            ).join(' ');
+        }
+
+        function addPoints(P1, P2) {
+            if(!P1 || !P2) {
+                P1 = parsePoint(document.getElementById('point1').value);
+                P2 = parsePoint(document.getElementById('point2').value);
+            }
+
+            if(!P1 || !P2) {
+                showMessage('Invalid points', 'error');
+                return null;
+            }
+
+            // Handle point at infinity cases
+            if(P1 === 'O') return P2;
+            if(P2 === 'O') return P1;
+
+            const { a, p } = curveParams;
+            let [x1, y1] = P1.split(',').map(Number);
+            let [x2, y2] = P2.split(',').map(Number);
+
+            // Calculate lambda (slope)
+            let lambda;
+            if(x1 === x2 && y1 === y2) {
+                // Point doubling
+                if(y1 === 0) return 'O';
+                let numerator = (3 * x1 * x1 + a) % p;
+                let denominator = modInverse(2 * y1, p);
+                if(!denominator) return null;
+                lambda = (numerator * denominator) % p;
+            } else {
+                // Point addition
+                if(x1 === x2) return 'O';
+                let numerator = (y2 - y1 + p) % p;
+                let denominator = modInverse((x2 - x1 + p) % p, p);
+                if(!denominator) return null;
+                lambda = (numerator * denominator) % p;
+            }
+
+            // Calculate new point
+            let x3 = (lambda * lambda - x1 - x2 + 2 * p) % p;
+            let y3 = (lambda * (x1 - x3) - y1 + p) % p;
+
+            return `${x3},${y3}`;
+        }
+
+        function scalarMultiply() {
+            let point = parsePoint(document.getElementById('base-point').value);
+            let k = parseInt(document.getElementById('scalar').value);
+
+            if(!point || !k) {
+                showMessage('Invalid input', 'error');
+                return;
+            }
+
+            let result = scalarMultiplyPoint(point, k);
+            document.getElementById('multiplication-result').innerHTML = `
+                <div class="step-box">
+                    Result: <span class="point">${formatPoint(result)}</span>
+                </div>
+            `;
+        }
+
+        function scalarMultiplyPoint(point, k) {
+            if(k === 0) return 'O';
+            if(k === 1) return point;
+
+            let result = 'O';
+            let current = point;
+            
+            while(k > 0) {
+                if(k & 1) {
+                    result = addPoints(result, current);
+                }
+                current = addPoints(current, current);
+                k = k >> 1;
+            }
+            
+            return result;
+        }
+
+        function performECDH() {
+            // Get private keys
+            let alicePrivate = parseInt(document.getElementById('alice-private').value);
+            let bobPrivate = parseInt(document.getElementById('bob-private').value);
+
+            // Use first non-O point as base point
+            let basePoint = curvePoints.find(p => p !== 'O');
+            if(!basePoint) {
+                showMessage('No valid base point found', 'error');
+                return;
+            }
+
+            // Calculate public keys
+            let alicePublic = scalarMultiplyPoint(basePoint, alicePrivate);
+            let bobPublic = scalarMultiplyPoint(basePoint, bobPrivate);
+
+            // Display public keys
+            document.getElementById('alice-public').innerHTML = 
+                `<span class="point">${formatPoint(alicePublic)}</span>`;
+            document.getElementById('bob-public').innerHTML = 
+                `<span class="point">${formatPoint(bobPublic)}</span>`;
+
+            // Calculate shared secrets
+            let aliceShared = scalarMultiplyPoint(bobPublic, alicePrivate);
+            let bobShared = scalarMultiplyPoint(alicePublic, bobPrivate);
+
+            // Display results
+            document.getElementById('ecdh-result').innerHTML = `
+                <h3>Shared Secrets:</h3>
+                <p>Alice's calculation: ${formatPoint(aliceShared)}</p>
+                <p>Bob's calculation: ${formatPoint(bobShared)}</p>
+                ${aliceShared === bobShared ? 
+                    '<p class="success">✓ Shared secrets match!</p>' : 
+                    '<p class="error">✗ Shared secrets do not match!</p>'}
+            `;
+        }
+
+        function signMessage() {
+            const message = document.getElementById('message').value;
+            const privateKey = parseInt(document.getElementById('signing-key').value);
+
+            if(!message || !privateKey) {
+                showMessage('Please provide message and private key', 'error');
+                return;
+            }
+
+            // Hash the message (simple implementation for demo)
+            const hash = simpleHash(message);
+
+            // Get base point
+            const basePoint = curvePoints.find(p => p !== 'O');
+            if(!basePoint) {
+                showMessage('No valid base point found', 'error');
+                return;
+            }
+
+            // Generate k (random number for this implementation)
+            const k = Math.floor(Math.random() * (curveParams.p - 1)) + 1;
+            
+            // Calculate R = kG
+            const R = scalarMultiplyPoint(basePoint, k);
+            const r = parseInt(R.split(',')[0]);
+
+            // Calculate s = k^(-1)(hash + r*privateKey) mod n
+            const n = curveParams.p; // Using p as order for simplicity
+            const kInv = modInverse(k, n);
+            const s = (kInv * (hash + r * privateKey)) % n;
+
+            // Display signature
+            document.getElementById('signature-result').innerHTML = `
+                <div class="step-box">
+                    <h4>Signature Components:</h4>
+                    <p>r = ${r}</p>
+                    <p>s = ${s}</p>
+                </div>
+            `;
+
+            // Store for verification
+            document.getElementById('verification-area').innerHTML = `
+                <p>Message: ${message}</p>
+                <p>r: ${r}</p>
+                <p>s: ${s}</p>
+            `;
+        }
+
+        function verifySignature() {
+            // Get verification data
+            const message = document.getElementById('message').value;
+            const r = parseInt(document.querySelector('#verification-area p:nth-child(2)').textContent.split(': ')[1]);
+            const s = parseInt(document.querySelector('#verification-area p:nth-child(3)').textContent.split(': ')[1]);
+
+            if(!message || !r || !s) {
+                showMessage('Please sign a message first', 'error');
+                return;
+            }
+
+            // Get base point and public key
+            const basePoint = curvePoints.find(p => p !== 'O');
+            const publicKey = scalarMultiplyPoint(basePoint, parseInt(document.getElementById('signing-key').value));
+
+            // Hash the message
+            const hash = simpleHash(message);
+
+            // Calculate w = s^(-1) mod n
+            const n = curveParams.p;
+            const w = modInverse(s, n);
+
+            // Calculate u1 = hash*w mod n and u2 = r*w mod n
+            const u1 = (hash * w) % n;
+            const u2 = (r * w) % n;
+
+            // Calculate u1*G + u2*publicKey
+            const point1 = scalarMultiplyPoint(basePoint, u1);
+            const point2 = scalarMultiplyPoint(publicKey, u2);
+            const R = addPoints(point1, point2);
+
+            // Verify that R's x-coordinate equals r
+            const xR = parseInt(R.split(',')[0]);
+            const isValid = xR === r;
+
+            document.getElementById('verification-result').innerHTML = `
+                <div class="step-box">
+                    <h4>Verification Result:</h4>
+                    ${isValid ? 
+                        '<p class="success">✓ Signature is valid!</p>' : 
+                        '<p class="error">✗ Signature is invalid!</p>'}
+                </div>
+            `;
+        }
+
+        // Utility functions
+        function parsePoint(str) {
+            if(!str) return null;
+            if(str === 'O') return 'O';
+            let [x, y] = str.split(',').map(Number);
+            if(isNaN(x) || isNaN(y)) return null;
+            return `${x},${y}`;
+        }
+
+        function formatPoint(point) {
+            if(point === 'O') return 'O';
+            return `(${point})`;
+        }
+
+        function simpleHash(message) {
+            let hash = 0;
+            for(let i = 0; i < message.length; i++) {
+                hash = ((hash << 5) - hash + message.charCodeAt(i)) % curveParams.p;
+            }
+            return Math.abs(hash);
+        }
+
+        function showMessage(text, type) {
+            const message = document.createElement('div');
+            message.className = `message ${type}`;
+            message.style.backgroundColor = 
+                type === 'error' ? '#e74c3c' : 
+                type === 'success' ? '#27ae60' : 
+                '#3498db';
+            message.textContent = text;
+            document.body.appendChild(message);
+            setTimeout(() => message.remove(), 3000);
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Initialize the simulator
+        window.onload = function() {
+            updateCurve();
+            showMessage('Welcome to ECC Simulator!', 'info');
+        };
+    </script>
+</body>
+</html>

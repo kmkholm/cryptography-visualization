@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Playfair Cipher Simulator Dr.Mohammed Tawfik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .matrix {
+            display: inline-block;
+            margin: 15px;
+            border: 2px solid #333;
+            padding: 5px;
+        }
+        .matrix-row {
+            display: flex;
+            justify-content: center;
+        }
+        .matrix-cell {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background-color: #fff;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        .step-display {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .pair {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+        }
+        .highlight {
+            background-color: #ffc107;
+        }
+        input[type="text"], textarea {
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .rules {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Playfair Cipher Simulator Dr.Mohammed Tawfik</h1>
+
+        <div class="rules">
+            <h3>Rules:</h3>
+            <ul>
+                <li>The key matrix is 5x5 using 25 letters (I/J are combined)</li>
+                <li>Text is split into pairs of letters</li>
+                <li>If a pair has the same letter, 'X' is inserted</li>
+                <li>If the message length is odd, 'X' is appended</li>
+                <li>For encryption:</li>
+                <ul>
+                    <li>Same row: Take letters to the right (wrap around)</li>
+                    <li>Same column: Take letters below (wrap around)</li>
+                    <li>Different row/column: Form rectangle, take corners on same row</li>
+                </ul>
+            </ul>
+        </div>
+
+        <div class="input-group">
+            <label for="key">Key Word (A-Z, no spaces):</label><br>
+            <input type="text" id="key" placeholder="Enter key" style="width: 300px" value="PLAYFAIR">
+            <button onclick="generateMatrix()">Generate Matrix</button>
+        </div>
+
+        <div id="matrix-display"></div>
+
+        <div class="input-group">
+            <label for="input-text">Text to Encrypt/Decrypt:</label><br>
+            <textarea id="input-text" rows="4" style="width: 100%" placeholder="Enter text (A-Z only)"></textarea>
+        </div>
+
+        <button onclick="encrypt()">Encrypt</button>
+        <button onclick="decrypt()">Decrypt</button>
+
+        <div class="step-display">
+            <h3>Prepared Text:</h3>
+            <div id="prepared-text"></div>
+        </div>
+
+        <div class="step-display">
+            <h3>Steps:</h3>
+            <div id="steps"></div>
+        </div>
+
+        <div class="step-display">
+            <h3>Result:</h3>
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        let matrix = [];
+        
+        function generateMatrix() {
+            let key = document.getElementById('key').value.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+            let alphabet = 'ABCDEFGHIKLMNOPQRSTUVWXYZ';
+            let matrixChars = new Set();
+            
+            // Add key characters
+            for (let char of key) {
+                matrixChars.add(char);
+            }
+            
+            // Add remaining alphabet
+            for (let char of alphabet) {
+                matrixChars.add(char);
+            }
+            
+            // Create 5x5 matrix
+            matrix = Array(5).fill().map(() => Array(5));
+            let chars = [...matrixChars];
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    matrix[i][j] = chars[i * 5 + j];
+                }
+            }
+            
+            displayMatrix();
+        }
+        
+        function displayMatrix() {
+            let html = '<div class="matrix">';
+            for (let row of matrix) {
+                html += '<div class="matrix-row">';
+                for (let cell of row) {
+                    html += `<div class="matrix-cell">${cell}</div>`;
+                }
+                html += '</div>';
+            }
+            html += '</div>';
+            document.getElementById('matrix-display').innerHTML = html;
+        }
+        
+        function findInMatrix(char) {
+            for (let i = 0; i < 5; i++) {
+                for (let j = 0; j < 5; j++) {
+                    if (matrix[i][j] === char) {
+                        return [i, j];
+                    }
+                }
+            }
+            return null;
+        }
+        
+        function prepareText(text, isEncryption = true) {
+            text = text.toUpperCase().replace(/J/g, 'I').replace(/[^A-Z]/g, '');
+            let pairs = [];
+            let i = 0;
+            
+            while (i < text.length) {
+                if (i === text.length - 1) {
+                    pairs.push([text[i], 'X']);
+                    break;
+                }
+                
+                if (text[i] === text[i + 1]) {
+                    pairs.push([text[i], 'X']);
+                    i++;
+                } else {
+                    pairs.push([text[i], text[i + 1]]);
+                    i += 2;
+                }
+            }
+            
+            return pairs;
+        }
+        
+        function processPlayfair(pairs, isEncryption = true) {
+            let result = [];
+            let steps = [];
+            
+            for (let [a, b] of pairs) {
+                let [row1, col1] = findInMatrix(a);
+                let [row2, col2] = findInMatrix(b);
+                
+                let newA, newB;
+                let step = `Processing pair ${a}${b}: `;
+                
+                if (row1 === row2) {
+                    // Same row
+                    newA = matrix[row1][(col1 + (isEncryption ? 1 : 4)) % 5];
+                    newB = matrix[row2][(col2 + (isEncryption ? 1 : 4)) % 5];
+                    step += "Same row - shift " + (isEncryption ? "right" : "left");
+                } else if (col1 === col2) {
+                    // Same column
+                    newA = matrix[(row1 + (isEncryption ? 1 : 4)) % 5][col1];
+                    newB = matrix[(row2 + (isEncryption ? 1 : 4)) % 5][col2];
+                    step += "Same column - shift " + (isEncryption ? "down" : "up");
+                } else {
+                    // Rectangle
+                    newA = matrix[row1][col2];
+                    newB = matrix[row2][col1];
+                    step += "Rectangle - swap columns";
+                }
+                
+                result.push([newA, newB]);
+                steps.push(step + ` → ${newA}${newB}`);
+            }
+            
+            return [result, steps];
+        }
+        
+        function encrypt() {
+            if (matrix.length === 0) {
+                alert("Please generate the key matrix first!");
+                return;
+            }
+            
+            let text = document.getElementById('input-text').value;
+            let pairs = prepareText(text);
+            
+            // Display prepared text
+            let preparedHtml = pairs.map(pair => 
+                `<span class="pair">${pair.join('')}</span>`
+            ).join(' ');
+            document.getElementById('prepared-text').innerHTML = preparedHtml;
+            
+            // Process and display steps
+            let [result, steps] = processPlayfair(pairs, true);
+            document.getElementById('steps').innerHTML = steps.join('<br>');
+            
+            // Display result
+            let resultText = result.map(pair => pair.join('')).join('');
+            document.getElementById('result').innerHTML = `<strong>${resultText}</strong>`;
+        }
+        
+        function decrypt() {
+            if (matrix.length === 0) {
+                alert("Please generate the key matrix first!");
+                return;
+            }
+            
+            let text = document.getElementById('input-text').value;
+            let pairs = prepareText(text);
+            
+            // Display prepared text
+            let preparedHtml = pairs.map(pair => 
+                `<span class="pair">${pair.join('')}</span>`
+            ).join(' ');
+            document.getElementById('prepared-text').innerHTML = preparedHtml;
+            
+            // Process and display steps
+            let [result, steps] = processPlayfair(pairs, false);
+            document.getElementById('steps').innerHTML = steps.join('<br>');
+            
+            // Display result
+            let resultText = result.map(pair => pair.join('')).join('');
+            document.getElementById('result').innerHTML = `<strong>${resultText}</strong>`;
+        }
+
+        // Initialize with default key
+        window.onload = function() {
+            generateMatrix();
+        };
+    </script>
+</body>
+</html>

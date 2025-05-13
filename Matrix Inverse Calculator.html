@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Matrix Inverse Calculator - Dr.Mohammed Tawfik</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #ecf0f1;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .calculator {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .matrix-input {
+            display: inline-block;
+            margin: 15px;
+            text-align: center;
+            vertical-align: top;
+        }
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 60px);
+            gap: 5px;
+            margin: 10px;
+            border: 2px solid #3498db;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        input[type="number"] {
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 16px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+        }
+        button {
+            background-color: #2980b9;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #3498db;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f0f9ff;
+            border-radius: 4px;
+        }
+        .matrix-label {
+            font-weight: bold;
+            margin: 10px;
+            color: #2c3e50;
+        }
+        .error {
+            color: #e74c3c;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #fadbd8;
+            border-radius: 4px;
+        }
+        .formula {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>2x2 Matrix Inverse Calculator (Mod 26)</h1>
+        <div class="author">Developed by Dr.Mohammed Tawfik</div>
+    </div>
+
+    <div class="calculator">
+        <div class="matrix-input">
+            <div class="matrix-label">Input Matrix K</div>
+            <div class="matrix-grid">
+                <input type="number" id="a" value="5">
+                <input type="number" id="b" value="8">
+                <input type="number" id="c" value="17">
+                <input type="number" id="d" value="3">
+            </div>
+        </div>
+
+        <button onclick="calculateInverse()">Calculate Inverse</button>
+
+        <div id="steps" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        function mod(n, m) {
+            return ((n % m) + m) % m;
+        }
+
+        function findModInverse(a, m) {
+            a = mod(a, m);
+            for(let x = 1; x < m; x++) {
+                if(mod(a * x, m) === 1) return x;
+            }
+            return null;
+        }
+
+        function calculateInverse() {
+            const a = parseInt(document.getElementById('a').value);
+            const b = parseInt(document.getElementById('b').value);
+            const c = parseInt(document.getElementById('c').value);
+            const d = parseInt(document.getElementById('d').value);
+            const m = 26; // modulus
+
+            const stepsDiv = document.getElementById('steps');
+            stepsDiv.style.display = 'block';
+            let steps = '';
+
+            // Step 1: Calculate determinant
+            const det = mod((a * d - b * c), m);
+            steps += `<div class="step">
+                <b>Step 1: Calculate determinant</b><br>
+                det = ad - bc = (${a} × ${d}) - (${b} × ${c})<br>
+                det = ${a*d} - ${b*c} = ${a*d - b*c}<br>
+                det ≡ ${det} (mod ${m})
+            </div>`;
+
+            // Step 2: Find determinant's modular multiplicative inverse
+            const detInv = findModInverse(det, m);
+            if (!detInv) {
+                stepsDiv.innerHTML = `<div class="error">Matrix is not invertible in mod ${m}! 
+                    The determinant (${det}) has no multiplicative inverse.</div>`;
+                return;
+            }
+
+            steps += `<div class="step">
+                <b>Step 2: Find determinant's modular multiplicative inverse</b><br>
+                Need x where ${det} × x ≡ 1 (mod ${m})<br>
+                Found: ${det} × ${detInv} ≡ 1 (mod ${m})
+            </div>`;
+
+            // Step 3: Calculate adjugate matrix
+            steps += `<div class="step">
+                <b>Step 3: Calculate adjugate matrix</b><br>
+                adj(K) = [d  -b]<br>
+                        [-c   a]
+            </div>`;
+
+            // Step 4: Calculate inverse
+            const invA = mod(d * detInv, m);
+            const invB = mod(-b * detInv, m);
+            const invC = mod(-c * detInv, m);
+            const invD = mod(a * detInv, m);
+
+            steps += `<div class="step">
+                <b>Step 4: Calculate inverse elements</b><br>
+                K⁻¹ = ${detInv} × [${d}  ${-b}]  (mod ${m})<br>
+                              [${-c}   ${a}]<br><br>
+                K⁻¹ = [${invA}  ${invB}]<br>
+                      [${invC}  ${invD}]
+            </div>`;
+
+            // Final result display
+            steps += `<div class="step">
+                <b>Final Result:</b><br>
+                K⁻¹ ≡ [${invA}  ${invB}] (mod ${m})<br>
+                      [${invC}  ${invD}]
+            </div>`;
+
+            stepsDiv.innerHTML = steps;
+        }
+    </script>
+</body>
+</html>

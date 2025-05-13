@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RSA Cipher Simulator - Dr. Mohammed Tawfik</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+            --light-bg: #ecf0f1;
+            --dark-bg: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f6fa;
+            color: #2c3e50;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .author {
+            font-style: italic;
+            color: #bdc3c7;
+            margin-top: 10px;
+        }
+
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            border-left: 5px solid var(--accent-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .info-box {
+            background-color: #f8f9fa;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .math-box {
+            font-family: 'Computer Modern', serif;
+            background-color: #fafafa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .step-box {
+            background-color: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+            transition: transform 0.2s;
+        }
+
+        .step-box:hover {
+            transform: translateX(5px);
+        }
+
+        .visualization {
+            background-color: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent-color), #2980b9);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .key-display {
+            font-family: monospace;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            margin: 10px 0;
+        }
+
+        .process-visualization {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .arrow {
+            font-size: 24px;
+            color: var(--accent-color);
+            margin: 10px 0;
+        }
+
+        .number-box {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin: 5px;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .prime-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 5px;
+            margin: 15px 0;
+        }
+
+        .prime-number {
+            background-color: var(--light-bg);
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .prime-number.selected {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--success-color));
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RSA Cipher Simulator</h1>
+            <div class="author">Developed for Dr. Mohammed Tawfik's Cryptography Course</div>
+        </div>
+
+        <div class="section">
+            <h2>1. Key Generation</h2>
+            <div class="grid">
+                <div class="info-box">
+                    <h3>Select Prime Numbers</h3>
+                    <div class="prime-grid" id="prime-selector"></div>
+                    <button onclick="generateNewPrimes()">Generate New Primes</button>
+                </div>
+                <div class="info-box">
+                    <h3>Selected Values</h3>
+                    <div id="selected-values"></div>
+                </div>
+            </div>
+            <button onclick="generateKeys()">Generate Keys</button>
+        </div>
+
+        <div class="section">
+            <h2>2. Message Processing</h2>
+            <div class="input-group">
+                <label for="message">Enter Message:</label>
+                <textarea id="message" rows="4" placeholder="Enter your message"></textarea>
+                <div class="process-visualization" id="message-process"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. Encryption/Decryption</h2>
+            <div class="grid">
+                <div class="visualization">
+                    <h3>Encryption Process</h3>
+                    <div id="encryption-steps"></div>
+                </div>
+                <div class="visualization">
+                    <h3>Decryption Process</h3>
+                    <div id="decryption-steps"></div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button onclick="encrypt()">Encrypt</button>
+                <button onclick="decrypt()">Decrypt</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. Results</h2>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        let publicKey = { e: 0, n: 0 };
+        let privateKey = { d: 0, n: 0 };
+        let primes = [];
+        let selectedP = 0;
+        let selectedQ = 0;
+
+        // Generate prime numbers
+        function isPrime(num) {
+            for(let i = 2; i <= Math.sqrt(num); i++) {
+                if(num % i === 0) return false;
+            }
+            return num > 1;
+        }
+
+        function generatePrimes() {
+            primes = [];
+            for(let i = 2; i < 100; i++) {
+                if(isPrime(i)) primes.push(i);
+            }
+            displayPrimes();
+        }
+
+        function displayPrimes() {
+            const grid = document.getElementById('prime-selector');
+            grid.innerHTML = primes.map(p => 
+                `<div class="prime-number" onclick="selectPrime(${p})">${p}</div>`
+            ).join('');
+        }
+
+        function selectPrime(p) {
+            if(!selectedP) {
+                selectedP = p;
+            } else if(!selectedQ && p !== selectedP) {
+                selectedQ = p;
+                displaySelectedValues();
+            }
+        }
+
+        function displaySelectedValues() {
+            const display = document.getElementById('selected-values');
+            display.innerHTML = `
+                <div class="key-display">
+                    <p>p = ${selectedP}</p>
+                    <p>q = ${selectedQ}</p>
+                    <p>n = ${selectedP * selectedQ}</p>
+                    <p>φ(n) = ${(selectedP - 1) * (selectedQ - 1)}</p>
+                </div>
+            `;
+        }
+
+        function gcd(a, b) {
+            if(b === 0) return a;
+            return gcd(b, a % b);
+        }
+
+        function modInverse(e, phi) {
+            let m0 = phi;
+            let y = 0, x = 1;
+            if(phi === 1) return 0;
+
+            while(e > 1) {
+                let q = Math.floor(e / phi);
+                let t = phi;
+                phi = e % phi;
+                e = t;
+                t = y;
+                y = x - q * y;
+                x = t;
+            }
+            if(x < 0) x += m0;
+            return x;
+        }
+
+        function generateKeys() {
+            if(!selectedP || !selectedQ) {
+                alert('Please select two prime numbers');
+                return;
+            }
+
+            const n = selectedP * selectedQ;
+            const phi = (selectedP - 1) * (selectedQ - 1);
+
+            // Choose e
+            let e = 65537; // Common choice for e
+            while(e < phi) {
+                if(gcd(e, phi) === 1) break;
+                e++;
+            }
+
+            // Calculate d
+            const d = modInverse(e, phi);
+
+            publicKey = { e, n };
+            privateKey = { d, n };
+
+            displayKeys();
+        }
+
+        function displayKeys() {
+            const results = document.getElementById('results');
+            results.innerHTML = `
+                <div class="math-box">
+                    <h3>Generated Keys:</h3>
+                    <p>Public Key (e,n): (${publicKey.e}, ${publicKey.n})</p>
+                    <p>Private Key (d,n): (${privateKey.d}, ${privateKey.n})</p>
+                </div>
+            `;
+        }
+
+        function textToNumbers(text) {
+            return text.split('').map(c => c.charCodeAt(0));
+        }
+
+        function numbersToText(numbers) {
+            return numbers.map(n => String.fromCharCode(n)).join('');
+        }
+
+        function modPow(base, exponent, modulus) {
+            if(modulus === 1) return 0;
+            let result = 1;
+            base = base % modulus;
+            while(exponent > 0) {
+                if(exponent % 2 === 1) {
+                    result = (result * base) % modulus;
+                }
+                base = (base * base) % modulus;
+                exponent = Math.floor(exponent / 2);
+            }
+            return result;
+        }
+
+        function encrypt() {
+            const message = document.getElementById('message').value;
+            const numbers = textToNumbers(message);
+            const encrypted = numbers.map(n => 
+                modPow(n, publicKey.e, publicKey.n)
+            );
+
+            displayEncryptionSteps(numbers, encrypted);
+            return encrypted;
+        }
+
+        function decrypt(encrypted) {
+            if(!encrypted) {
+                encrypted = prompt('Enter encrypted numbers (comma-separated):')
+                    .split(',').map(Number);
+            }
+            
+            const decrypted = encrypted.map(n =>
+                modPow(n, privateKey.d, privateKey.n)
+            );
+            
+            const text = numbersToText(decrypted);
+            displayDecryptionSteps(encrypted, decrypted, text);
+            return text;
+        }
+
+        function displayEncryptionSteps(input, output) {
+            const steps = document.getElementById('encryption-steps');
+            steps.innerHTML = `
+                <div class="step-box">
+                    <h4>Original Message to Numbers:</h4>
+                    <p>${input.join(', ')}</p>
+                </div>
+                <div class="step-box">
+                    <h4>After Encryption:</h4>
+                    <p>${output.join(', ')}</p>
+                </div>
+            `;
+        }
+
+        function displayDecryptionSteps(input, output, text) {
+            const steps = document.getElementById('decryption-steps');
+            steps.innerHTML = `
+                <div class="step-box">
+                    <h4>Encrypted Numbers:</h4>
+                    <p>${input.join(', ')}</p>
+                </div>
+                <div class="step-box">
+                    <h4>Decrypted Numbers:</h4>
+                    <p>${output.join(', ')}</p>
+                </div>
+                <div class="step-box">
+                    <h4>Final Text:</h4>
+                    <p>${text}</p>
+                </div>
+            `;
+        }
+
+        // Initialize
+        window.onload = function() {
+            generatePrimes();
+        };
+   </script>
+</body>
+<footer>
+    <div class="info-box">
+        <h3>About RSA Algorithm</h3>
+        <div class="math-box">
+            <p><strong>Key Generation Steps:</strong></p>
+            <ol>
+                <li>Choose two prime numbers p and q</li>
+                <li>Calculate n = p × q</li>
+                <li>Calculate φ(n) = (p-1) × (q-1)</li>
+                <li>Choose e where 1 < e < φ(n) and e is coprime to φ(n)</li>
+                <li>Calculate d where d × e ≡ 1 (mod φ(n))</li>
+            </ol>
+            <p><strong>Encryption:</strong> C = M<sup>e</sup> mod n</p>
+            <p><strong>Decryption:</strong> M = C<sup>d</sup> mod n</p>
+        </div>
+        <div class="key-properties">
+            <h4>Properties:</h4>
+            <ul>
+                <li>Public Key: (e, n)</li>
+                <li>Private Key: (d, n)</li>
+                <li>Security depends on the difficulty of factoring n</li>
+                <li>Commonly used for digital signatures and secure key exchange</li>
+            </ul>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Utility Functions
+    function showMessage(message, type = 'info') {
+        const messageBox = document.createElement('div');
+        messageBox.className = `message ${type}`;
+        messageBox.textContent = message;
+        document.body.appendChild(messageBox);
+        setTimeout(() => messageBox.remove(), 3000);
+    }
+
+    function validateInput(input) {
+        return input.replace(/[^A-Za-z0-9\s]/g, '');
+    }
+
+    // Extended Key Generation Functions
+    function generateRandomPrime() {
+        const min = 100;
+        const max = 1000;
+        let num = Math.floor(Math.random() * (max - min) + min);
+        while (!isPrime(num)) {
+            num++;
+        }
+        return num;
+    }
+
+    function generateNewPrimes() {
+        selectedP = generateRandomPrime();
+        do {
+            selectedQ = generateRandomPrime();
+        } while (selectedQ === selectedP);
+        
+        displaySelectedValues();
+        showMessage('New prime numbers generated!', 'success');
+    }
+
+    // Enhanced Encryption/Decryption Visualization
+    function visualizeProcess(input, output, isEncryption = true) {
+        const processDiv = document.createElement('div');
+        processDiv.className = 'process-visualization';
+        
+        const inputBox = document.createElement('div');
+        inputBox.className = 'number-box';
+        inputBox.innerHTML = `<strong>${isEncryption ? 'Plain' : 'Cipher'}</strong><br>${input}`;
+        
+        const arrow = document.createElement('div');
+        arrow.className = 'arrow';
+        arrow.innerHTML = '↓';
+        
+        const formulaBox = document.createElement('div');
+        formulaBox.className = 'math-box';
+        formulaBox.innerHTML = isEncryption ? 
+            `C ≡ M<sup>${publicKey.e}</sup> mod ${publicKey.n}` :
+            `M ≡ C<sup>${privateKey.d}</sup> mod ${privateKey.n}`;
+        
+        const outputBox = document.createElement('div');
+        outputBox.className = 'number-box';
+        outputBox.innerHTML = `<strong>${isEncryption ? 'Cipher' : 'Plain'}</strong><br>${output}`;
+        
+        processDiv.appendChild(inputBox);
+        processDiv.appendChild(arrow);
+        processDiv.appendChild(formulaBox);
+        processDiv.appendChild(arrow.cloneNode(true));
+        processDiv.appendChild(outputBox);
+        
+        document.getElementById('message-process').appendChild(processDiv);
+    }
+
+    // Progress Bar Animation
+    function updateProgress(percent) {
+        const progressBar = document.querySelector('.progress-fill');
+        progressBar.style.width = `${percent}%`;
+    }
+
+    // Event Listeners
+    document.getElementById('message').addEventListener('input', function(e) {
+        e.target.value = validateInput(e.target.value);
+    });
+
+    // Enhanced Prime Selection
+    function handlePrimeSelection(prime) {
+        const primeElements = document.querySelectorAll('.prime-number');
+        primeElements.forEach(el => el.classList.remove('selected'));
+        
+        if (!selectedP) {
+            selectedP = prime;
+            document.querySelector(`[onclick="selectPrime(${prime})"]`).classList.add('selected');
+        } else if (!selectedQ && prime !== selectedP) {
+            selectedQ = prime;
+            document.querySelector(`[onclick="selectPrime(${prime})"]`).classList.add('selected');
+            displaySelectedValues();
+        } else {
+            showMessage('Please reset selection first', 'warning');
+        }
+    }
+
+    function resetSelection() {
+        selectedP = 0;
+        selectedQ = 0;
+        document.querySelectorAll('.prime-number').forEach(el => el.classList.remove('selected'));
+        document.getElementById('selected-values').innerHTML = '';
+        showMessage('Selection reset', 'info');
+    }
+
+    // Initialize with additional features
+    window.onload = function() {
+        generatePrimes();
+        
+        // Add progress bar
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        progressBar.innerHTML = '<div class="progress-fill"></div>';
+        document.querySelector('.container').appendChild(progressBar);
+        
+        // Add reset button
+        const resetButton = document.createElement('button');
+        resetButton.textContent = 'Reset Selection';
+        resetButton.onclick = resetSelection;
+        document.querySelector('.button-group').appendChild(resetButton);
+        
+        // Show welcome message
+        showMessage('Welcome to RSA Cipher Simulator!', 'info');
+    };
+</script>
+</html>
