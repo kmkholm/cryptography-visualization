@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElGamal Digital Signature Simulation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 20px;
+        }
+        
+        h1 {
+            color: #3a0ca3;
+            margin-bottom: 10px;
+        }
+        
+        .author {
+            font-style: italic;
+            color: #4361ee;
+        }
+        
+        .contact {
+            color: #4895ef;
+            font-size: 0.9em;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        
+        .tab.active {
+            color: #4361ee;
+            border-bottom-color: #4361ee;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background-color: #fafafa;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"], 
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: #4361ee;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #3a0ca3;
+        }
+        
+        button.secondary {
+            background-color: #4cc9f0;
+        }
+        
+        button.danger {
+            background-color: #f72585;
+        }
+        
+        button.secondary:hover {
+            background-color: #1d9bf0;
+        }
+        
+        button.danger:hover {
+            background-color: #d01b6b;
+        }
+        
+        .panel {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .panel-title {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #3a0ca3;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .param-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .param-box {
+            flex: 1;
+            min-width: 250px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .param-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #4361ee;
+        }
+        
+        .param-value {
+            font-family: "Courier New", monospace;
+            word-break: break-all;
+            padding: 5px;
+            background-color: #eef;
+            border-radius: 3px;
+        }
+        
+        .step {
+            margin-bottom: 20px;
+            padding-left: 20px;
+            border-left: 3px solid #4361ee;
+        }
+        
+        .step-number {
+            font-weight: bold;
+            color: #3a0ca3;
+        }
+        
+        .formula {
+            font-family: "Cambria Math", "Times New Roman", serif;
+            background-color: #f0f0f0;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: inline-block;
+        }
+        
+        .verification-result {
+            text-align: center;
+            font-weight: bold;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .verification-result.valid {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .verification-result.invalid {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .info-box {
+            background-color: #e7f5ff;
+            border-left: 5px solid #4895ef;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .warning-box {
+            background-color: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #6c757d;
+            font-size: 0.9em;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ElGamal Digital Signature Algorithm</h1>
+            <div class="author">By Dr. Mohammed Tawfik</div>
+            <div class="contact">kmkhol01@gmail.com</div>
+        </header>
+        
+        <div class="info-box">
+            <p>The ElGamal digital signature scheme is a cryptographic algorithm for digital signatures based on the Discrete Logarithm Problem. It allows a signer to create a signature that others can verify, without revealing the signer's private key.</p>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="keygen">Key Generation</div>
+            <div class="tab" data-tab="sign">Sign Message</div>
+            <div class="tab" data-tab="verify">Verify Signature</div>
+            <div class="tab" data-tab="overview">Overview</div>
+        </div>
+        
+        <!-- Key Generation Tab -->
+        <div class="tab-content active" id="keygen-tab">
+            <h2>Key Generation</h2>
+            
+            <div class="grid-2">
+                <div class="panel">
+                    <h3 class="panel-title">Generate Keys</h3>
+                    <button id="generate-random-btn">Generate Random Keys</button>
+                    <div id="key-size-selection" style="margin-top: 15px;">
+                        <label>Select Key Size:</label>
+                        <select id="key-size">
+                            <option value="tiny">Tiny (for demo)</option>
+                            <option value="small" selected>Small (for demo)</option>
+                            <option value="medium">Medium (slower)</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4>Or Enter Custom Parameters:</h4>
+                        <div class="form-group">
+                            <label for="custom-p">Prime (p):</label>
+                            <input type="number" id="custom-p" placeholder="Enter a prime number">
+                        </div>
+                        <div class="form-group">
+                            <label for="custom-g">Generator (g):</label>
+                            <input type="number" id="custom-g" placeholder="Generator">
+                        </div>
+                        <div class="form-group">
+                            <label for="custom-x">Private Key (x):</label>
+                            <input type="number" id="custom-x" placeholder="Private key">
+                        </div>
+                        <button id="apply-custom-params">Apply Custom Parameters</button>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h3 class="panel-title">Key Generation Steps</h3>
+                    <div class="step">
+                        <div class="step-number">Step 1:</div>
+                        <p>Choose a large prime number p</p>
+                        <div id="keygen-step1" class="param-value">p = ...</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Step 2:</div>
+                        <p>Find a primitive root (generator) g modulo p</p>
+                        <div id="keygen-step2" class="param-value">g = ...</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Step 3:</div>
+                        <p>Select a random number x (1 &lt; x &lt; p-1) as the private key</p>
+                        <div id="keygen-step3" class="param-value">x = ...</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Step 4:</div>
+                        <p>Compute y = g<sup>x</sup> mod p as the public key</p>
+                        <div id="keygen-step4" class="param-value">y = g<sup>x</sup> mod p = ...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="param-group">
+                <div class="param-box">
+                    <div class="param-label">Public Key</div>
+                    <div id="public-key" class="param-value">(p, g, y) = (...)</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-label">Private Key</div>
+                    <div id="private-key" class="param-value">x = ...</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Signature Generation Tab -->
+        <div class="tab-content" id="sign-tab">
+            <h2>Sign a Message</h2>
+            
+            <div class="grid-2">
+                <div class="panel">
+                    <h3 class="panel-title">Message to Sign</h3>
+                    <div class="form-group">
+                        <label for="message-input">Enter Message:</label>
+                        <input type="text" id="message-input" value="Hello, ElGamal!">
+                    </div>
+                    <button id="sign-message-btn">Sign Message</button>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4>Advanced Options:</h4>
+                        <div class="form-group">
+                            <label for="custom-k">Custom k value (optional):</label>
+                            <input type="number" id="custom-k" placeholder="Random k value">
+                            <div style="font-size: 0.85em; color: #666; margin-top: 4px;">k must be coprime to p-1 and between 1 and p-1</div>
+                        </div>
+                        <button id="use-custom-k-btn" class="secondary">Use Custom k</button>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h3 class="panel-title">Signature Generation Steps</h3>
+                    <div class="step">
+                        <div class="step-number">Step 1:</div>
+                        <p>Compute the message hash H(m)</p>
+                        <div id="sign-step1" class="param-value">message = "..."<br>H(m) = ...</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Step 2:</div>
+                        <p>Choose a random k with 1 &lt; k &lt; p-1 and gcd(k, p-1) = 1</p>
+                        <div id="sign-step2" class="param-value">k = ...<br>gcd(k, p-1) = 1 ✓</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Step 3:</div>
+                        <p>Compute r = g<sup>k</sup> mod p</p>
+                        <div id="sign-step3" class="param-value">r = g<sup>k</sup> mod p = ...</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Step 4:</div>
+                        <p>Compute s = k<sup>-1</sup>(H(m) - x·r) mod (p-1)</p>
+                        <div id="sign-step4" class="param-value">s = k<sup>-1</sup>(H(m) - x·r) mod (p-1) = ...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="param-group">
+                <div class="param-box">
+                    <div class="param-label">Message</div>
+                    <div id="signed-message" class="param-value">"..."</div>
+                </div>
+                <div class="param-box">
+                    <div class="param-label">Signature</div>
+                    <div id="signature" class="param-value">(r, s) = (...)</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Signature Verification Tab -->
+        <div class="tab-content" id="verify-tab">
+            <h2>Verify Signature</h2>
+            
+            <div class="grid-2">
+                <div class="panel">
+                    <h3 class="panel-title">Verification Controls</h3>
+                    <div class="form-group">
+                        <label for="verify-message">Message:</label>
+                        <input type="text" id="verify-message" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Signature:</label>
+                        <div id="verify-signature" class="param-value">(r, s) = (...)</div>
+                    </div>
+                    <button id="verify-btn">Verify Signature</button>
+                    <button id="tamper-btn" class="danger">Tamper with Message</button>
+                    <button id="restore-btn" class="secondary">Restore Original</button>
+                </div>
+                
+                <div class="panel">
+                    <h3 class="panel-title">Verification Steps</h3>
+                    <div class="step">
+                        <div class="step-number">Step 1:</div>
+                        <p>Check that 0 &lt; r &lt; p and 0 &lt; s &lt; p-1</p>
+                        <div id="verify-step1" class="param-value">Range check: ...</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Step 2:</div>
+                        <p>Compute v1 = y<sup>r</sup> · r<sup>s</sup> mod p</p>
+                        <div id="verify-step2" class="param-value">v1 = y<sup>r</sup> · r<sup>s</sup> mod p = ...</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Step 3:</div>
+                        <p>Compute v2 = g<sup>H(m)</sup> mod p</p>
+                        <div id="verify-step3" class="param-value">v2 = g<sup>H(m)</sup> mod p = ...</div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">Step 4:</div>
+                        <p>Verify that v1 = v2</p>
+                        <div id="verify-step4" class="param-value">v1 = v2 ? ...</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="verification-result" class="verification-result">
+                Signature verification result will appear here
+            </div>
+        </div>
+        
+        <!-- Overview Tab -->
+        <div class="tab-content" id="overview-tab">
+            <h2>ElGamal Digital Signature Overview</h2>
+            
+            <p>The ElGamal Digital Signature Algorithm is a public-key cryptography scheme based on the mathematical principles of the Discrete Logarithm Problem. It was described by Taher ElGamal in 1985.</p>
+            
+            <h3>Key Components</h3>
+            <div class="panel">
+                <h4>Mathematical Foundation</h4>
+                <p>The scheme relies on the difficulty of computing discrete logarithms in a finite field. Given values g, p, and y, it's computationally difficult to find x such that:</p>
+                <div class="formula">g<sup>x</sup> ≡ y (mod p)</div>
+                <p>when p is a large prime.</p>
+            </div>
+            
+            <div class="panel">
+                <h4>Security Considerations</h4>
+                <ul>
+                    <li>The value k (used in signature generation) must be random and unique for each message</li>
+                    <li>If k is ever reused or predictable, the private key can be compromised</li>
+                    <li>The prime p should be large enough to resist discrete logarithm attacks</li>
+                    <li>In practice, p should be at least 2048 bits for adequate security</li>
+                </ul>
+            </div>
+            
+            <div class="panel">
+                <h4>Applications</h4>
+                <p>ElGamal signatures are used for:</p>
+                <ul>
+                    <li>Digital document signing</li>
+                    <li>Authentication systems</li>
+                    <li>Secure communications</li>
+                    <li>Certificate authorities</li>
+                </ul>
+            </div>
+            
+            <div class="warning-box">
+                <strong>Note:</strong> This simulation uses small numbers for educational purposes. In real-world applications, much larger prime numbers and more secure hash functions would be used.
+            </div>
+        </div>
+        
+        <footer>
+            ElGamal Digital Signature Algorithm - Interactive Simulation &copy; 2025<br>
+            Developed by Dr. Mohammed Tawfik (kmkhol01@gmail.com)
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // ElGamal parameters
+            let p, g, x, y; // p: prime, g: generator, x: private key, y: public key
+            let r, s; // Signature components
+            let message = "Hello, ElGamal!";
+            let originalMessage = message;
+            
+            let useCustomK = false;
+            let customK;
+            
+            // DOM elements
+            const generateRandomBtn = document.getElementById('generate-random-btn');
+            const keySizeSelect = document.getElementById('key-size');
+            const customPInput = document.getElementById('custom-p');
+            const customGInput = document.getElementById('custom-g');
+            const customXInput = document.getElementById('custom-x');
+            const applyCustomParamsBtn = document.getElementById('apply-custom-params');
+            
+            const messageInput = document.getElementById('message-input');
+            const signMessageBtn = document.getElementById('sign-message-btn');
+            const customKInput = document.getElementById('custom-k');
+            const useCustomKBtn = document.getElementById('use-custom-k-btn');
+            
+            const verifyMessageInput = document.getElementById('verify-message');
+            const verifyBtn = document.getElementById('verify-btn');
+            const tamperBtn = document.getElementById('tamper-btn');
+            const restoreBtn = document.getElementById('restore-btn');
+            
+            // ===================== HELPER FUNCTIONS =====================
+            
+            function isPrime(n) {
+                if (n <= 1) return false;
+                if (n <= 3) return true;
+                if (n % 2 === 0 || n % 3 === 0) return false;
+                
+                for (let i = 5; i * i <= n; i += 6) {
+                    if (n % i === 0 || n % (i + 2) === 0) return false;
+                }
+                return true;
+            }
+            
+            function gcd(a, b) {
+                while (b !== 0) {
+                    const temp = b;
+                    b = a % b;
+                    a = temp;
+                }
+                return a;
+            }
+            
+            function modPow(base, exponent, modulus) {
+                if (modulus === 1) return 0;
+                
+                let result = 1;
+                base = base % modulus;
+                
+                while (exponent > 0) {
+                    if (exponent % 2 === 1) {
+                        result = (result * base) % modulus;
+                    }
+                    exponent = Math.floor(exponent / 2);
+                    base = (base * base) % modulus;
+                }
+                
+                return result;
+            }
+            
+            function modInverse(a, m) {
+                // Extended Euclidean Algorithm
+                let m0 = m;
+                let y = 0;
+                let x = 1;
+                
+                if (m === 1) return 0;
+                
+                while (a > 1) {
+                    const q = Math.floor(a / m);
+                    let t = m;
+                    
+                    m = a % m;
+                    a = t;
+                    t = y;
+                    
+                    y = x - q * y;
+                    x = t;
+                }
+                
+                if (x < 0) x += m0;
+                
+                return x;
+            }
+            
+            function findPrimitiveRoot(p) {
+                // For small primes, we can use a simple approach
+                for (let g = 2; g < p; g++) {
+                    const seen = new Set();
+                    let value = 1;
+                    let isRoot = true;
+                    
+                    for (let i = 1; i < p - 1; i++) {
+                        value = (value * g) % p;
+                        if (seen.has(value)) {
+                            isRoot = false;
+                            break;
+                        }
+                        seen.add(value);
+                    }
+                    
+                    if (isRoot) return g;
+                }
+                return 2; // Default, but this should never happen for the primes we use
+            }
+            
+            function simpleHash(message) {
+                let hash = 0;
+                for (let i = 0; i < message.length; i++) {
+                    hash = ((hash << 5) - hash) + message.charCodeAt(i);
+                    hash |= 0; // Convert to 32bit integer
+                }
+                return Math.abs(hash) % 1000000;
+            }
+            
+            // ===================== UI FUNCTIONS =====================
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.style.display = 'none');
+                    
+                    tab.classList.add('active');
+                    document.getElementById(tabId + '-tab').style.display = 'block';
+                });
+            });
+            
+            // ===================== EVENT LISTENERS =====================
+            
+            // Key generation
+            generateRandomBtn.addEventListener('click', generateRandomKeys);
+            applyCustomParamsBtn.addEventListener('click', applyCustomParameters);
+            
+            // Signing
+            signMessageBtn.addEventListener('click', handleSignMessage);
+            useCustomKBtn.addEventListener('click', () => {
+                const kValue = parseInt(customKInput.value);
+                
+                if (!p) {
+                    alert("Please generate keys first!");
+                    return;
+                }
+                
+                if (!kValue || kValue < 2 || kValue >= p - 1) {
+                    alert("k must be between 2 and p-2!");
+                    return;
+                }
+                
+                if (gcd(kValue, p - 1) !== 1) {
+                    alert("k must be coprime to p-1!");
+                    return;
+                }
+                
+                useCustomK = true;
+                customK = kValue;
+                alert(`Custom k = ${kValue} will be used for the next signature.`);
+            });
+            
+            // Verification
+            verifyBtn.addEventListener('click', verifySignature);
+            tamperBtn.addEventListener('click', tamperMessage);
+            restoreBtn.addEventListener('click', restoreMessage);
+            
+            // ===================== CORE FUNCTIONS =====================
+            
+            function generateRandomKeys() {
+                const keySize = keySizeSelect.value;
+                let minP, maxP;
+                
+                switch (keySize) {
+                    case "tiny":
+                        minP = 11;
+                        maxP = 23;
+                        break;
+                    case "small":
+                        minP = 23;
+                        maxP = 97;
+                        break;
+                    case "medium":
+                        minP = 101;
+                        maxP = 997;
+                        break;
+                    default:
+                        minP = 23;
+                        maxP = 97;
+                }
+                
+                // Generate a prime p
+                do {
+                    p = Math.floor(Math.random() * (maxP - minP + 1)) + minP;
+                } while (!isPrime(p));
+                
+                // Find a primitive root g modulo p
+                g = findPrimitiveRoot(p);
+                
+                // Generate private key x (1 < x < p-1)
+                x = Math.floor(Math.random() * (p - 3)) + 2;
+                
+                // Compute public key y = g^x mod p
+                y = modPow(g, x, p);
+                
+                // Update UI
+                updateKeyGenerationUI();
+                
+                // Reset signature
+                r = s = undefined;
+                updateVerificationUI();
+            }
+            
+            function applyCustomParameters() {
+                const customP = parseInt(customPInput.value);
+                const customG = parseInt(customGInput.value);
+                const customX = parseInt(customXInput.value);
+                
+                // Validate inputs
+                if (!customP || !isPrime(customP)) {
+                    alert("Please enter a valid prime number for p!");
+                    return;
+                }
+                
+                if (!customG || customG < 2 || customG >= customP) {
+                    alert("Generator g must be between 2 and p-1!");
+                    return;
+                }
+                
+                if (!customX || customX < 1 || customX >= customP - 1) {
+                    alert("Private key x must be between 1 and p-2!");
+                    return;
+                }
+                
+                // Set the custom parameters
+                p = customP;
+                g = customG;
+                x = customX;
+                
+                // Compute the public key y = g^x mod p
+                y = modPow(g, x, p);
+                
+                // Update UI
+                updateKeyGenerationUI();
+                
+                // Reset signature
+                r = s = undefined;
+                updateVerificationUI();
+            }
+            
+            function handleSignMessage() {
+                if (!p || !g || !x || !y) {
+                    alert("Please generate keys first!");
+                    return;
+                }
+                
+                message = messageInput.value;
+                if (!message) {
+                    alert("Please enter a message to sign!");
+                    return;
+                }
+                
+                originalMessage = message;
+                verifyMessageInput.value = message;
+                
+                // Sign the message
+                signMessage(message);
+                
+                // Update verification tab
+                updateVerificationUI();
+            }
+            
+            function signMessage(msg) {
+                // Calculate the hash of the message
+                const m = simpleHash(msg);
+                
+                let k;
+                
+                // Use custom k if provided, otherwise generate randomly
+                if (useCustomK && customK) {
+                    k = customK;
+                    useCustomK = false; // Reset for next time
+                    customKInput.value = ""; // Clear the input field
+                } else {
+                    // Choose a random k such that 1 < k < p-1 and gcd(k, p-1) = 1
+                    do {
+                        k = Math.floor(Math.random() * (p - 3)) + 2;
+                    } while (gcd(k, p - 1) !== 1);
+                }
+                
+                // Calculate r = g^k mod p
+                r = modPow(g, k, p);
+                
+                // Calculate k inverse modulo (p-1)
+                const kInv = modInverse(k, p - 1);
+                
+                // Calculate s = k^-1 * (m - x*r) mod (p-1)
+                const xr = (x * r) % (p - 1);
+                let diff = (m - xr) % (p - 1);
+                if (diff < 0) diff += (p - 1);
+                
+                s = (kInv * diff) % (p - 1);
+                
+                // Update UI
+                document.getElementById('sign-step1').textContent = `message = "${msg}"\nH(m) = ${m}`;
+                document.getElementById('sign-step2').textContent = `k = ${k}\ngcd(k, p-1) = gcd(${k}, ${p-1}) = 1 ✓`;
+                document.getElementById('sign-step3').textContent = `r = g^k mod p\nr = ${g}^${k} mod ${p}\nr = ${r}`;
+                document.getElementById('sign-step4').textContent = `s = k^-1(H(m) - x·r) mod (p-1)\ns = ${kInv}(${m} - ${x}·${r}) mod ${p-1}\ns = ${s}`;
+                
+                document.getElementById('signed-message').textContent = `"${msg}"`;
+                document.getElementById('signature').textContent = `(r, s) = (${r}, ${s})`;
+            }
+            
+            function verifySignature() {
+                if (!p || !g || !y || r === undefined || s === undefined) {
+                    alert("Please generate keys and sign a message first!");
+                    return;
+                }
+                
+                // Check that 0 < r < p and 0 < s < p-1
+                const validRange = (r > 0 && r < p && s > 0 && s < p - 1);
+                const rangeCheckText = `0 < r < p: ${r > 0 && r < p ? "Yes ✓" : "No ✗"}\n0 < s < p-1: ${s > 0 && s < p - 1 ? "Yes ✓" : "No ✗"}`;
+                
+                // Calculate the hash of the message
+                const m = simpleHash(verifyMessageInput.value || message);
+                
+                // Compute v1 = y^r * r^s mod p
+                const v1 = (modPow(y, r, p) * modPow(r, s, p)) % p;
+                
+                // Compute v2 = g^m mod p
+                const v2 = modPow(g, m, p);
+                
+                // Signature is valid if v1 = v2
+                const isValid = validRange && (v1 === v2);
+                
+                // Update UI
+                document.getElementById('verify-step1').textContent = rangeCheckText;
+                document.getElementById('verify-step2').textContent = `v1 = y^r · r^s mod p\nv1 = ${y}^${r} · ${r}^${s} mod ${p}\nv1 = ${v1}`;
+                document.getElementById('verify-step3').textContent = `v2 = g^H(m) mod p\nv2 = ${g}^${m} mod ${p}\nv2 = ${v2}`;
+                document.getElementById('verify-step4').textContent = `v1 ${v1 === v2 ? '=' : '≠'} v2 (${isValid ? 'Valid ✓' : 'Invalid ✗'})`;
+                
+                const verificationResult = document.getElementById('verification-result');
+                verificationResult.textContent = isValid ? "SIGNATURE VERIFIED ✓" : "INVALID SIGNATURE ✗";
+                verificationResult.className = isValid ? "verification-result valid" : "verification-result invalid";
+            }
+            
+            function tamperMessage() {
+                const currentMessage = verifyMessageInput.value;
+                if (currentMessage === originalMessage) {
+                    verifyMessageInput.value = originalMessage + " [Tampered]";
+                }
+            }
+            
+            function restoreMessage() {
+                verifyMessageInput.value = originalMessage;
+            }
+            
+            // ===================== UI UPDATE FUNCTIONS =====================
+            
+            function updateKeyGenerationUI() {
+                document.getElementById('keygen-step1').textContent = `p = ${p}`;
+                document.getElementById('keygen-step2').textContent = `g = ${g}`;
+                document.getElementById('keygen-step3').textContent = `x = ${x}`;
+                document.getElementById('keygen-step4').textContent = `y = g^x mod p = ${g}^${x} mod ${p} = ${y}`;
+                
+                document.getElementById('public-key').textContent = `(p, g, y) = (${p}, ${g}, ${y})`;
+                document.getElementById('private-key').textContent = `x = ${x}`;
+                
+                // Update custom inputs with current values
+                customPInput.value = p;
+                customGInput.value = g;
+                customXInput.value = x;
+            }
+            
+            function updateVerificationUI() {
+                document.getElementById('verify-message').value = message;
+                document.getElementById('verify-signature').textContent = (r !== undefined && s !== undefined) ? 
+                    `(r, s) = (${r}, ${s})` : "(r, s) = (...)";
+                
+                // Reset verification display
+                document.getElementById('verify-step1').textContent = 'Range check: ...';
+                document.getElementById('verify-step2').textContent = 'v1 = y^r · r^s mod p = ...';
+                document.getElementById('verify-step3').textContent = 'v2 = g^H(m) mod p = ...';
+                document.getElementById('verify-step4').textContent = 'v1 = v2 ? ...';
+                
+                const verificationResult = document.getElementById('verification-result');
+                verificationResult.textContent = "Signature verification result will appear here";
+                verificationResult.className = "verification-result";
+            }
+            
+            // Initialize with random keys
+            generateRandomKeys();
+        });
+    </script>
+</body>
+</html>
