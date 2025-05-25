@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Cryptography Simulation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .credit {
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            margin: 0 5px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .content {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .simulation-area {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .visualization {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 14px;
+        }
+
+        .input-group input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a6f);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .step-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #ff6b6b;
+        }
+
+        .step-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffeb3b;
+        }
+
+        .calculation {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            line-height: 1.6;
+        }
+
+        .explanation-box {
+            background: rgba(76, 175, 80, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            border-left: 3px solid #4CAF50;
+            font-size: 14px;
+        }
+
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #ecCanvas {
+            background: linear-gradient(45deg, rgba(0, 0, 0, 0.5), rgba(50, 50, 50, 0.5));
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffeb3b;
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .key-display {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .comparison-table th {
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: bold;
+        }
+
+        .alice-section, .bob-section {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .alice-section {
+            border-left: 4px solid #2196F3;
+        }
+
+        .bob-section {
+            border-left: 4px solid #FF9800;
+        }
+
+        .math-breakdown {
+            background: rgba(255, 235, 59, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 8px 0;
+            border-left: 3px solid #ffeb3b;
+        }
+
+        .math-step {
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .error-message {
+            background: rgba(244, 67, 54, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 3px solid #f44336;
+        }
+
+        .success-message {
+            background: rgba(76, 175, 80, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 3px solid #4CAF50;
+        }
+
+        .matrix-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .matrix-cell {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            text-align: center;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .explanation {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .warning {
+            background: rgba(255, 152, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #FF9800;
+        }
+
+        .point-info {
+            background: rgba(156, 39, 176, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            border-left: 3px solid #9c27b0;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .simulation-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Advanced Cryptography Simulation</h1>
+            <p>Interactive Diffie-Hellman Key Exchange & Elliptic Curve Cryptography</p>
+            <div class="credit">Programmed by Dr. Mohammed Tawfik</div>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab active" onclick="showTab('dh')">Diffie-Hellman</button>
+            <button class="tab" onclick="showTab('ecc')">Elliptic Curve Crypto</button>
+            <button class="tab" onclick="showTab('comparison')">Security Comparison</button>
+        </div>
+
+        <div id="dh" class="content active">
+            <h2>🤝 Diffie-Hellman Key Exchange</h2>
+            <div class="simulation-area">
+                <div class="controls">
+                    <div class="input-group">
+                        <label>Prime (q):</label>
+                        <input type="number" id="dhPrime" value="353" min="2">
+                    </div>
+                    <div class="input-group">
+                        <label>Generator (a):</label>
+                        <input type="number" id="dhGenerator" value="3" min="2">
+                    </div>
+                    <div class="input-group">
+                        <label>Alice's Private Key (x_A):</label>
+                        <input type="number" id="alicePrivate" value="97" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Bob's Private Key (x_B):</label>
+                        <input type="number" id="bobPrivate" value="233" min="1">
+                    </div>
+                    <button class="button" onclick="runDHSimulation()">🚀 Run Simulation</button>
+                    <button class="button" onclick="generateRandomDH()">🎲 Random Values</button>
+                    <button class="button" onclick="demonstrateAttack()">⚠️ Show MITM Attack</button>
+                </div>
+                <div class="visualization" id="dhVisualization">
+                    <h3>Step-by-Step Process</h3>
+                    <div id="dhSteps"></div>
+                </div>
+            </div>
+            <div id="dhResults"></div>
+        </div>
+
+        <div id="ecc" class="content">
+            <h2>📈 Elliptic Curve Cryptography</h2>
+            <div class="simulation-area">
+                <div class="controls">
+                    <div class="input-group">
+                        <label>Curve Parameter a:</label>
+                        <input type="number" id="eccA" value="-1" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Curve Parameter b:</label>
+                        <input type="number" id="eccB" value="1" step="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Prime p:</label>
+                        <input type="number" id="eccPrime" value="23" min="5">
+                    </div>
+                    <div class="input-group">
+                        <label>Base Point G (x,y):</label>
+                        <input type="text" id="eccBasePoint" value="1,7" placeholder="x,y">
+                    </div>
+                    <div class="input-group">
+                        <label>Alice's Private Key (n_A):</label>
+                        <input type="number" id="eccAlicePrivate" value="7" min="1">
+                    </div>
+                    <div class="input-group">
+                        <label>Bob's Private Key (n_B):</label>
+                        <input type="number" id="eccBobPrivate" value="5" min="1">
+                    </div>
+                    <button class="button" onclick="runECCSimulation()">🚀 Run ECC Simulation</button>
+                    <button class="button" onclick="generateRandomECC()">🎲 Random Values</button>
+                    <button class="button" onclick="plotEllipticCurve()">📊 Plot Curve</button>
+                </div>
+                <div class="visualization">
+                    <div class="canvas-container">
+                        <canvas id="ecCanvas" width="600" height="300"></canvas>
+                    </div>
+                    <div id="eccSteps"></div>
+                </div>
+            </div>
+            <div id="eccResults"></div>
+        </div>
+
+        <div id="comparison" class="content">
+            <h2>🔒 Security & Performance Comparison</h2>
+            
+            <div class="explanation">
+                <h3>Key Size Comparison</h3>
+                <p>This table shows equivalent security levels between different cryptographic systems:</p>
+            </div>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Symmetric Key (bits)</th>
+                        <th>ECC Key (bits)</th>
+                        <th>RSA/DH Key (bits)</th>
+                        <th>Security Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>56</td><td>112</td><td>512</td><td>Very Low</td></tr>
+                    <tr><td>80</td><td>160</td><td>1024</td><td>Low</td></tr>
+                    <tr><td>112</td><td>224</td><td>2048</td><td>Medium</td></tr>
+                    <tr><td>128</td><td>256</td><td>3072</td><td>High</td></tr>
+                    <tr><td>192</td><td>384</td><td>7680</td><td>Very High</td></tr>
+                    <tr><td>256</td><td>512</td><td>15360</td><td>Ultra High</td></tr>
+                </tbody>
+            </table>
+
+            <div class="explanation">
+                <h3>Performance Analysis</h3>
+                <div id="performanceComparison"></div>
+            </div>
+
+            <div class="warning">
+                <h3>⚠️ Security Considerations</h3>
+                <ul>
+                    <li><strong>Discrete Logarithm Problem:</strong> Both DH and ECC rely on the difficulty of solving discrete logarithms</li>
+                    <li><strong>Man-in-the-Middle Attacks:</strong> Both are vulnerable without proper authentication</li>
+                    <li><strong>Quantum Resistance:</strong> Neither DH nor ECC is quantum-resistant</li>
+                    <li><strong>Implementation:</strong> ECC requires more careful implementation but offers better efficiency</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let animationFrameId;
+        let particles = [];
+
+        function showTab(tabName) {
+            // Hide all content
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected content and tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Initialize specific tab content
+            if (tabName === 'ecc') {
+                setTimeout(plotEllipticCurve, 100);
+            } else if (tabName === 'comparison') {
+                generatePerformanceComparison();
+            }
+        }
+
+        // Utility functions
+        function modExp(base, exp, mod) {
+            let result = 1;
+            base = base % mod;
+            while (exp > 0) {
+                if (exp % 2 === 1) {
+                    result = (result * base) % mod;
+                }
+                exp = Math.floor(exp / 2);
+                base = (base * base) % mod;
+            }
+            return result;
+        }
+
+        function modInverse(a, m) {
+            // Extended Euclidean Algorithm
+            function extendedGCD(a, b) {
+                if (a === 0) return [b, 0, 1];
+                let [gcd, x1, y1] = extendedGCD(b % a, a);
+                let x = y1 - Math.floor(b / a) * x1;
+                let y = x1;
+                return [gcd, x, y];
+            }
+            
+            let [gcd, x, y] = extendedGCD(a % m, m);
+            if (gcd !== 1) return null; // No inverse exists
+            return ((x % m) + m) % m;
+        }
+
+        function isPrime(n) {
+            if (n < 2) return false;
+            for (let i = 2; i <= Math.sqrt(n); i++) {
+                if (n % i === 0) return false;
+            }
+            return true;
+        }
+
+        // Enhanced Diffie-Hellman Implementation with detailed explanations
+        function runDHSimulation() {
+            const q = parseInt(document.getElementById('dhPrime').value);
+            const a = parseInt(document.getElementById('dhGenerator').value);
+            const xA = parseInt(document.getElementById('alicePrivate').value);
+            const xB = parseInt(document.getElementById('bobPrivate').value);
+
+            if (!isPrime(q)) {
+                document.getElementById('dhSteps').innerHTML = 
+                    '<div class="error-message">❌ Error: q must be a prime number!</div>';
+                return;
+            }
+
+            if (a >= q) {
+                document.getElementById('dhSteps').innerHTML = 
+                    '<div class="error-message">❌ Error: Generator a must be less than prime q!</div>';
+                return;
+            }
+
+            // Calculate public keys with detailed steps
+            const yA = modExp(a, xA, q);
+            const yB = modExp(a, xB, q);
+
+            // Calculate shared keys
+            const kAB_Alice = modExp(yB, xA, q);
+            const kAB_Bob = modExp(yA, xB, q);
+
+            displayDHStepsDetailed(q, a, xA, xB, yA, yB, kAB_Alice, kAB_Bob);
+            createDHVisualization();
+        }
+
+        function displayDHStepsDetailed(q, a, xA, xB, yA, yB, kAB_Alice, kAB_Bob) {
+            const stepsHtml = `
+                <div class="step-container">
+                    <div class="step-title">Step 1: Public Parameters Setup</div>
+                    <div class="calculation">Prime modulus: q = ${q}</div>
+                    <div class="calculation">Generator: a = ${a}</div>
+                    <div class="explanation-box">
+                        📚 <strong>What this means:</strong><br>
+                        • q is a large prime number (public)<br>
+                        • a is a generator mod q (public)<br>
+                        • Everyone uses the same q and a
+                    </div>
+                </div>
+
+                <div class="alice-section">
+                    <h4>👩 Alice's Key Generation</h4>
+                    <div class="calculation">1. Choose private key: x_A = ${xA}</div>
+                    <div class="explanation-box">🔒 Alice keeps this secret!</div>
+                    
+                    <div class="calculation">2. Calculate public key: y_A = a^x_A mod q</div>
+                    <div class="math-breakdown">
+                        <div class="step-title">Step-by-step calculation:</div>
+                        <div class="math-step">y_A = ${a}^${xA} mod ${q}</div>
+                        <div class="math-step">y_A = ${yA}</div>
+                    </div>
+                    <div class="explanation-box">
+                        📢 <strong>Alice sends y_A = ${yA} to Bob (public)</strong><br>
+                        This is safe to send because finding x_A from y_A is very hard!
+                    </div>
+                    
+                    <div class="calculation">3. Receive Bob's public key: y_B = ${yB}</div>
+                    <div class="calculation">4. Calculate shared secret: K = y_B^x_A mod q</div>
+                    <div class="math-breakdown">
+                        <div class="step-title">Shared key calculation:</div>
+                        <div class="math-step">K = y_B^x_A mod q</div>
+                        <div class="math-step">K = ${yB}^${xA} mod ${q}</div>
+                        <div class="math-step">K = ${kAB_Alice}</div>
+                    </div>
+                </div>
+
+                <div class="bob-section">
+                    <h4>👨 Bob's Key Generation</h4>
+                    <div class="calculation">1. Choose private key: x_B = ${xB}</div>
+                    <div class="explanation-box">🔒 Bob keeps this secret!</div>
+                    
+                    <div class="calculation">2. Calculate public key: y_B = a^x_B mod q</div>
+                    <div class="math-breakdown">
+                        <div class="step-title">Step-by-step calculation:</div>
+                        <div class="math-step">y_B = ${a}^${xB} mod ${q}</div>
+                        <div class="math-step">y_B = ${yB}</div>
+                    </div>
+                    <div class="explanation-box">
+                        📢 <strong>Bob sends y_B = ${yB} to Alice (public)</strong><br>
+                        This is safe to send because finding x_B from y_B is very hard!
+                    </div>
+                    
+                    <div class="calculation">3. Receive Alice's public key: y_A = ${yA}</div>
+                    <div class="calculation">4. Calculate shared secret: K = y_A^x_B mod q</div>
+                    <div class="math-breakdown">
+                        <div class="step-title">Shared key calculation:</div>
+                        <div class="math-step">K = y_A^x_B mod q</div>
+                        <div class="math-step">K = ${yA}^${xB} mod ${q}</div>
+                        <div class="math-step">K = ${kAB_Bob}</div>
+                    </div>
+                </div>
+
+                <div class="key-display">
+                    🔐 Final Shared Secret Key: ${kAB_Alice}
+                    ${kAB_Alice === kAB_Bob ? '✅ Keys Match! Secure communication established!' : '❌ Keys Don\'t Match!'}
+                </div>
+
+                <div class="explanation-box">
+                    🧮 <strong>Why it works mathematically:</strong><br>
+                    Alice computes: K = y_B^x_A = (a^x_B)^x_A = a^(x_A × x_B) mod q<br>
+                    Bob computes: K = y_A^x_B = (a^x_A)^x_B = a^(x_A × x_B) mod q<br>
+                    Both get the same result: a^(x_A × x_B) mod q
+                </div>
+            `;
+
+            document.getElementById('dhSteps').innerHTML = stepsHtml;
+        }
+
+        function createDHVisualization() {
+            const visualization = document.getElementById('dhVisualization');
+            
+            // Create animated particles
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 3 + 's';
+                visualization.appendChild(particle);
+            }
+
+            // Remove particles after animation
+            setTimeout(() => {
+                document.querySelectorAll('.particle').forEach(p => p.remove());
+            }, 5000);
+        }
+
+        function generateRandomDH() {
+            const primes = [23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353];
+            
+            const q = primes[Math.floor(Math.random() * primes.length)];
+            const a = Math.floor(Math.random() * (q - 2)) + 2;
+            const xA = Math.floor(Math.random() * (q - 1)) + 1;
+            const xB = Math.floor(Math.random() * (q - 1)) + 1;
+
+            document.getElementById('dhPrime').value = q;
+            document.getElementById('dhGenerator').value = a;
+            document.getElementById('alicePrivate').value = xA;
+            document.getElementById('bobPrivate').value = xB;
+        }
+
+        function demonstrateAttack() {
+            alert('🚨 Man-in-the-Middle Attack Demo\n\n' +
+                  'In a MITM attack, Eve intercepts communications:\n' +
+                  '1. Eve creates two key pairs\n' +
+                  '2. Pretends to be Bob when talking to Alice\n' +
+                  '3. Pretends to be Alice when talking to Bob\n' +
+                  '4. Can decrypt, read, and re-encrypt all messages\n\n' +
+                  'Solution: Use authenticated key exchange protocols!');
+        }
+
+        // Fixed Elliptic Curve Implementation
+        class EllipticCurve {
+            constructor(a, b, p) {
+                this.a = a;
+                this.b = b;
+                this.p = p;
+            }
+
+            isValidPoint(x, y) {
+                if (x === null && y === null) return true; // Point at infinity
+                const left = (y * y) % this.p;
+                const right = (x * x * x + this.a * x + this.b) % this.p;
+                const normalizedLeft = left < 0 ? left + this.p : left;
+                const normalizedRight = right < 0 ? right + this.p : right;
+                return normalizedLeft === normalizedRight;
+            }
+
+            pointAdd(P1, P2) {
+                if (P1[0] === null) return [P2[0], P2[1]];
+                if (P2[0] === null) return [P1[0], P1[1]];
+
+                const [x1, y1] = P1;
+                const [x2, y2] = P2;
+
+                if (x1 === x2) {
+                    if (y1 === y2) {
+                        return this.pointDouble(P1);
+                    } else {
+                        return [null, null]; // Point at infinity
+                    }
+                }
+
+                const dx = ((x2 - x1) % this.p + this.p) % this.p;
+                const dy = ((y2 - y1) % this.p + this.p) % this.p;
+                const dxInv = modInverse(dx, this.p);
+                
+                if (dxInv === null) return [null, null];
+                
+                const slope = (dy * dxInv) % this.p;
+                const x3 = ((slope * slope - x1 - x2) % this.p + this.p) % this.p;
+                const y3 = ((slope * (x1 - x3) - y1) % this.p + this.p) % this.p;
+
+                return [x3, y3];
+            }
+
+            pointDouble(P) {
+                const [x, y] = P;
+                if (y === 0) return [null, null];
+
+                const numerator = ((3 * x * x + this.a) % this.p + this.p) % this.p;
+                const denominator = ((2 * y) % this.p + this.p) % this.p;
+                const denominatorInv = modInverse(denominator, this.p);
+                
+                if (denominatorInv === null) return [null, null];
+                
+                const slope = (numerator * denominatorInv) % this.p;
+                const x3 = ((slope * slope - 2 * x) % this.p + this.p) % this.p;
+                const y3 = ((slope * (x - x3) - y) % this.p + this.p) % this.p;
+
+                return [x3, y3];
+            }
+
+            pointMultiply(k, P) {
+                if (k === 0) return [null, null];
+                if (k === 1) return [P[0], P[1]];
+
+                let result = [null, null];
+                let addend = [P[0], P[1]];
+
+                while (k > 0) {
+                    if (k & 1) {
+                        result = this.pointAdd(result, addend);
+                    }
+                    addend = this.pointDouble(addend);
+                    k = k >> 1;
+                }
+
+                return result;
+            }
+
+            getPointsOnCurve() {
+                const points = [];
+                for (let x = 0; x < this.p; x++) {
+                    for (let y = 0; y < this.p; y++) {
+                        if (this.isValidPoint(x, y)) {
+                            points.push([x, y]);
+                        }
+                    }
+                }
+                return points;
+            }
+        }
+
+        function runECCSimulation() {
+            const a = parseInt(document.getElementById('eccA').value);
+            const b = parseInt(document.getElementById('eccB').value);
+            const p = parseInt(document.getElementById('eccPrime').value);
+            const basePointStr = document.getElementById('eccBasePoint').value;
+            const nA = parseInt(document.getElementById('eccAlicePrivate').value);
+            const nB = parseInt(document.getElementById('eccBobPrivate').value);
+
+            if (!isPrime(p)) {
+                document.getElementById('eccSteps').innerHTML = 
+                    '<div class="error-message">❌ Error: p must be a prime number!</div>';
+                return;
+            }
+
+            let gx, gy;
+            try {
+                [gx, gy] = basePointStr.split(',').map(x => parseInt(x.trim()));
+            } catch (e) {
+                document.getElementById('eccSteps').innerHTML = 
+                    '<div class="error-message">❌ Error: Invalid base point format! Use "x,y"</div>';
+                return;
+            }
+
+            const G = [gx, gy];
+            const curve = new EllipticCurve(a, b, p);
+
+            if (!curve.isValidPoint(gx, gy)) {
+                document.getElementById('eccSteps').innerHTML = 
+                    `<div class="error-message">❌ Error: Point (${gx}, ${gy}) is not on the curve y² = x³ + ${a}x + ${b} (mod ${p})!</div>`;
+                return;
+            }
+
+            // Calculate public keys
+            const PA = curve.pointMultiply(nA, G);
+            const PB = curve.pointMultiply(nB, G);
+
+            // Calculate shared keys
+            const sharedA = curve.pointMultiply(nA, PB);
+            const sharedB = curve.pointMultiply(nB, PA);
+
+            displayECCStepsDetailed(curve, G, nA, nB, PA, PB, sharedA, sharedB);
+            plotEllipticCurve();
+        }
+
+        function displayECCStepsDetailed(curve, G, nA, nB, PA, PB, sharedA, sharedB) {
+            const stepsHtml = `
+                <div class="step-container">
+                    <div class="step-title">Elliptic Curve Parameters</div>
+                    <div class="calculation">Curve: y² = x³ + (${curve.a})x + ${curve.b} (mod ${curve.p})</div>
+                    <div class="calculation">Base point G = (${G[0]}, ${G[1]})</div>
+                    <div class="explanation-box">
+                        📚 <strong>ECC Setup:</strong><br>
+                        • Everyone uses the same curve equation and base point G<br>
+                        • The base point G generates a group of points<br>
+                        • Point multiplication (scalar × point) is the key operation
+                    </div>
+                </div>
+
+                <div class="alice-section">
+                    <h4>👩 Alice's ECC Key Generation</h4>
+                    <div class="calculation">1. Choose private key: n_A = ${nA}</div>
+                    <div class="explanation-box">🔒 Alice keeps this scalar secret!</div>
+                    
+                    <div class="calculation">2. Calculate public key: P_A = n_A × G</div>
+                    <div class="math-breakdown">
+                        <div class="step-title">Point multiplication steps:</div>
+                        <div class="math-step">P_A = ${nA} × (${G[0]}, ${G[1]})</div>
+                        <div class="math-step">P_A = (${PA[0]}, ${PA[1]})</div>
+                    </div>
+                    <div class="explanation-box">
+                        📢 <strong>Alice sends P_A = (${PA[0]}, ${PA[1]}) to Bob (public)</strong><br>
+                        Finding n_A from P_A is the elliptic curve discrete log problem - very hard!
+                    </div>
+                    
+                    <div class="calculation">3. Receive Bob's public key: P_B = (${PB[0]}, ${PB[1]})</div>
+                    <div class="calculation">4. Calculate shared secret: K = n_A × P_B</div>
+                    <div class="math-breakdown">
+                        <div class="step-title">Shared key calculation:</div>
+                        <div class="math-step">K = n_A × P_B</div>
+                        <div class="math-step">K = ${nA} × (${PB[0]}, ${PB[1]})</div>
+                        <div class="math-step">K = (${sharedA[0]}, ${sharedA[1]})</div>
+                    </div>
+                </div>
+
+                <div class="bob-section">
+                    <h4>👨 Bob's ECC Key Generation</h4>
+                    <div class="calculation">1. Choose private key: n_B = ${nB}</div>
+                    <div class="explanation-box">🔒 Bob keeps this scalar secret!</div>
+                    
+                    <div class="calculation">2. Calculate public key: P_B = n_B × G</div>
+                    <div class="math-breakdown">
+                        <div class="step-title">Point multiplication steps:</div>
+                        <div class="math-step">P_B = ${nB} × (${G[0]}, ${G[1]})</div>
+                        <div class="math-step">P_B = (${PB[0]}, ${PB[1]})</div>
+                    </div>
+                    <div class="explanation-box">
+                        📢 <strong>Bob sends P_B = (${PB[0]}, ${PB[1]}) to Alice (public)</strong><br>
+                        Finding n_B from P_B is the elliptic curve discrete log problem - very hard!
+                    </div>
+                    
+                    <div class="calculation">3. Receive Alice's public key: P_A = (${PA[0]}, ${PA[1]})</div>
+                    <div class="calculation">4. Calculate shared secret: K = n_B × P_A</div>
+                    <div class="math-breakdown">
+                        <div class="step-title">Shared key calculation:</div>
+                        <div class="math-step">K = n_B × P_A</div>
+                        <div class="math-step">K = ${nB} × (${PA[0]}, ${PA[1]})</div>
+                        <div class="math-step">K = (${sharedB[0]}, ${sharedB[1]})</div>
+                    </div>
+                </div>
+
+                <div class="key-display">
+                    🔐 Final Shared Secret Point: (${sharedA[0]}, ${sharedA[1]})
+                    ${sharedA[0] === sharedB[0] && sharedA[1] === sharedB[1] ? '✅ Keys Match! Secure communication established!' : '❌ Keys Don\'t Match!'}
+                </div>
+
+                <div class="explanation-box">
+                    🧮 <strong>Why it works mathematically:</strong><br>
+                    Alice computes: K = n_A × P_B = n_A × (n_B × G) = (n_A × n_B) × G<br>
+                    Bob computes: K = n_B × P_A = n_B × (n_A × G) = (n_A × n_B) × G<br>
+                    Both get the same result: (n_A × n_B) × G
+                </div>
+
+                <div class="point-info">
+                    📊 <strong>Curve Information:</strong><br>
+                    • Total points on this curve: ${curve.getPointsOnCurve().length}<br>
+                    • Base point order: Computing...<br>
+                    • Security level: Depends on curve size and point order
+                </div>
+            `;
+
+            document.getElementById('eccSteps').innerHTML = stepsHtml;
+        }
+
+        function plotEllipticCurve() {
+            const canvas = document.getElementById('ecCanvas');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            
+            const a = parseInt(document.getElementById('eccA').value) || -1;
+            const b = parseInt(document.getElementById('eccB').value) || 1;
+            const p = parseInt(document.getElementById('eccPrime').value) || 23;
+
+            // Clear canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            
+            const scaleX = canvas.width / (p + 1);
+            const scaleY = canvas.height / (p + 1);
+
+            for (let i = 0; i <= p; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * scaleX, 0);
+                ctx.lineTo(i * scaleX, canvas.height);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, canvas.height - (i * scaleY));
+                ctx.lineTo(canvas.width, canvas.height - (i * scaleY));
+                ctx.stroke();
+            }
+
+            // Draw axis labels
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.font = '10px Arial';
+            for (let i = 0; i <= p; i += 5) {
+                ctx.fillText(i.toString(), i * scaleX, canvas.height - 5);
+                ctx.fillText(i.toString(), 5, canvas.height - (i * scaleY));
+            }
+
+            // Plot curve points
+            const curve = new EllipticCurve(a, b, p);
+            const points = curve.getPointsOnCurve();
+
+            ctx.fillStyle = '#ffeb3b';
+            points.forEach(([x, y]) => {
+                const canvasX = x * scaleX;
+                const canvasY = canvas.height - (y * scaleY);
+                
+                ctx.beginPath();
+                ctx.arc(canvasX, canvasY, 3, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+
+            // Highlight base point if valid
+            try {
+                const basePointStr = document.getElementById('eccBasePoint').value;
+                const [gx, gy] = basePointStr.split(',').map(x => parseInt(x.trim()));
+                
+                if (curve.isValidPoint(gx, gy)) {
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.beginPath();
+                    ctx.arc(gx * scaleX, canvas.height - (gy * scaleY), 6, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    // Add label for base point
+                    ctx.fillStyle = 'white';
+                    ctx.font = '12px Arial';
+                    ctx.fillText(`G(${gx},${gy})`, gx * scaleX + 10, canvas.height - (gy * scaleY) - 10);
+                }
+            } catch (e) {
+                // Invalid base point format
+            }
+
+            // Add title and info
+            ctx.fillStyle = 'white';
+            ctx.font = '14px Arial';
+            ctx.fillText(`y² = x³ + (${a})x + ${b} (mod ${p})`, 10, 25);
+            ctx.font = '12px Arial';
+            ctx.fillText(`${points.length} points on curve`, 10, 45);
+            ctx.fillText('Yellow dots: curve points, Red dot: base point G', 10, canvas.height - 10);
+        }
+
+        function generateRandomECC() {
+            const primes = [23, 29, 31, 37, 41, 43, 47];
+            const p = primes[Math.floor(Math.random() * primes.length)];
+            
+            // Use well-known curve parameters
+            let a, b;
+            if (p === 23) {
+                a = -1; b = 1; // Good curve for p = 23
+            } else {
+                a = Math.floor(Math.random() * p) - Math.floor(p/2);
+                b = Math.floor(Math.random() * p);
+            }
+
+            document.getElementById('eccA').value = a;
+            document.getElementById('eccB').value = b;
+            document.getElementById('eccPrime').value = p;
+
+            // Find a valid base point
+            const curve = new EllipticCurve(a, b, p);
+            const points = curve.getPointsOnCurve();
+            
+            if (points.length > 0) {
+                const randomPoint = points[Math.floor(Math.random() * points.length)];
+                document.getElementById('eccBasePoint').value = `${randomPoint[0]},${randomPoint[1]}`;
+            } else {
+                document.getElementById('eccBasePoint').value = '1,1';
+            }
+
+            document.getElementById('eccAlicePrivate').value = Math.floor(Math.random() * 10) + 2;
+            document.getElementById('eccBobPrivate').value = Math.floor(Math.random() * 10) + 2;
+
+            setTimeout(plotEllipticCurve, 100);
+        }
+
+        function generatePerformanceComparison() {
+            const comparisonHtml = `
+                <div class="matrix-display">
+                    <div class="matrix-cell"><strong>Metric</strong></div>
+                    <div class="matrix-cell"><strong>Diffie-Hellman</strong></div>
+                    <div class="matrix-cell"><strong>ECC</strong></div>
+                    
+                    <div class="matrix-cell">Key Generation</div>
+                    <div class="matrix-cell">Slow (large exponents)</div>
+                    <div class="matrix-cell">Fast (small scalars)</div>
+                    
+                    <div class="matrix-cell">Key Size (128-bit security)</div>
+                    <div class="matrix-cell">3072 bits</div>
+                    <div class="matrix-cell">256 bits</div>
+                    
+                    <div class="matrix-cell">Memory Usage</div>
+                    <div class="matrix-cell">High</div>
+                    <div class="matrix-cell">Low</div>
+                    
+                    <div class="matrix-cell">Bandwidth</div>
+                    <div class="matrix-cell">High</div>
+                    <div class="matrix-cell">Low</div>
+                    
+                    <div class="matrix-cell">Implementation</div>
+                    <div class="matrix-cell">Simple</div>
+                    <div class="matrix-cell">Complex</div>
+                    
+                    <div class="matrix-cell">Quantum Resistance</div>
+                    <div class="matrix-cell">No</div>
+                    <div class="matrix-cell">No</div>
+                </div>
+
+                <div class="explanation">
+                    <h4>💡 Key Insights</h4>
+                    <ul>
+                        <li><strong>Efficiency:</strong> ECC provides the same security as RSA/DH with much smaller keys</li>
+                        <li><strong>Performance:</strong> Smaller keys mean faster operations and less bandwidth</li>
+                        <li><strong>Mobile/IoT:</strong> ECC is preferred for resource-constrained devices</li>
+                        <li><strong>Future:</strong> Both will need to be replaced by quantum-resistant algorithms</li>
+                    </ul>
+                </div>
+            `;
+
+            document.getElementById('performanceComparison').innerHTML = comparisonHtml;
+        }
+
+        // Initialize the simulation
+        window.onload = function() {
+            runDHSimulation();
+            generatePerformanceComparison();
+            
+            // Add some initial particles for visual appeal
+            setTimeout(() => {
+                createDHVisualization();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
