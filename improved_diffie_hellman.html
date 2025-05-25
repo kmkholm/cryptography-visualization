@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enhanced Diffie-Hellman Key Exchange Simulator - Dr. Mohammed Tawfik</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f1c40f;
+            --info-color: #3498db;
+            --light-bg: #ecf0f1;
+            --dark-bg: #2c3e50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #2c3e50;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .author {
+            font-style: italic;
+            color: #bdc3c7;
+            margin-top: 15px;
+            font-size: 1.1em;
+        }
+
+        .section {
+            margin: 25px 0;
+            padding: 25px;
+            background-color: white;
+            border-radius: 15px;
+            border-left: 5px solid var(--accent-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin: 25px 0;
+        }
+
+        .participant {
+            padding: 25px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            border: 3px solid var(--accent-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .participant::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .participant:hover::before {
+            left: 100%;
+        }
+
+        .participant:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .exchange-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .arrow {
+            font-size: 32px;
+            color: var(--accent-color);
+            margin: 0 30px;
+            animation: pulse 2s infinite;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.7; }
+        }
+
+        .color-mix {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 15px auto;
+            transition: all 0.5s ease;
+            border: 4px solid white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .color-mix::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.4);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .color-mix:hover::before {
+            width: 100%;
+            height: 100%;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent-color), #c0392b);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        button:hover::before {
+            width: 200%;
+            height: 200%;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .math-box {
+            font-family: 'Computer Modern', 'Times New Roman', serif;
+            background: linear-gradient(135deg, #fafafa, #f0f0f0);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            border: 1px solid #ddd;
+        }
+
+        .step-box {
+            background-color: #fff;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 5px solid var(--accent-color);
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .step-box:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .visualization {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        input[type="number"] {
+            width: 120px;
+            padding: 12px;
+            margin: 8px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
+            outline: none;
+        }
+
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 25px;
+            color: white;
+            animation: slideIn 0.5s ease-out;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-weight: 600;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--success-color));
+            transition: width 0.5s ease;
+            width: 0%;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: progressShine 2s infinite;
+        }
+
+        @keyframes progressShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .steps-indicator {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .step-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .step-indicator.completed {
+            background-color: var(--success-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .step-indicator.current {
+            background-color: var(--info-color);
+            color: white;
+            animation: currentStep 1s infinite alternate;
+        }
+
+        .step-indicator.pending {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+
+        @keyframes currentStep {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .step-label {
+            font-size: 14px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .security-level {
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .security-low {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 2px solid #c62828;
+        }
+
+        .security-medium {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            border: 2px solid #ef6c00;
+        }
+
+        .security-high {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 2px solid #2e7d32;
+        }
+
+        .calculation-steps {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid var(--info-color);
+        }
+
+        .calculation-step {
+            margin: 8px 0;
+            padding: 8px;
+            background-color: white;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Enhanced Diffie-Hellman Key Exchange Simulator</h1>
+            <div class="author">Developed for Dr. Mohammed Tawfik's Cryptography Course</div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="main-progress"></div>
+        </div>
+
+        <div class="section">
+            <h2>📋 1. Initial Parameters</h2>
+            <div class="info-box">
+                <h3>Set Public Parameters</h3>
+                <div class="math-box">
+                    <p>Prime Modulus (p): <input type="number" id="prime-modulus" value="23" min="2"></p>
+                    <p>Generator (g): <input type="number" id="generator" value="5" min="2"></p>
+                </div>
+                <button onclick="validateParameters()">🔍 Validate Parameters</button>
+                <button onclick="generateRandomPrime()">🎲 Generate Random Prime</button>
+                <div id="security-indicator"></div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="participant" id="alice">
+                <h3>👩‍💻 Alice</h3>
+                <div class="info-box">
+                    <p>Private Key (a): <input type="number" id="alice-private" min="1" max="22" value="6"></p>
+                    <div class="color-mix" id="alice-color" title="Alice's secret color"></div>
+                    <p><strong>Public Value A:</strong> <span id="alice-public">-</span></p>
+                    <div id="alice-calculation"></div>
+                </div>
+            </div>
+
+            <div class="participant" id="bob">
+                <h3>👨‍💻 Bob</h3>
+                <div class="info-box">
+                    <p>Private Key (b): <input type="number" id="bob-private" min="1" max="22" value="15"></p>
+                    <div class="color-mix" id="bob-color" title="Bob's secret color"></div>
+                    <p><strong>Public Value B:</strong> <span id="bob-public">-</span></p>
+                    <div id="bob-calculation"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="exchange-area">
+            <div class="visualization" id="exchange-visualization">
+                <p>🚀 Ready to start the key exchange process!</p>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="btn-step1" onclick="calculatePublicValues()">🧮 1. Calculate Public Values</button>
+            <button id="btn-step2" onclick="exchangeValues()" disabled>🔄 2. Exchange Public Values</button>
+            <button id="btn-step3" onclick="calculateSharedSecret()" disabled>🔑 3. Calculate Shared Secret</button>
+            <button onclick="resetSimulation()">🔄 Reset</button>
+            <button onclick="exportResults()">💾 Export Results</button>
+        </div>
+
+        <div class="section">
+            <h2>📊 Results & Analysis</h2>
+            <div class="step-box" id="results">
+                <p>Complete the steps above to see the detailed results...</p>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>🎓 How Diffie-Hellman Works:</h3>
+            <div class="calculation-steps">
+                <div class="calculation-step">1. 🤝 Alice and Bob agree on public values p (prime modulus) and g (generator)</div>
+                <div class="calculation-step">2. 🔐 Alice chooses private key a, calculates A = g^a mod p</div>
+                <div class="calculation-step">3. 🔐 Bob chooses private key b, calculates B = g^b mod p</div>
+                <div class="calculation-step">4. 🔄 They exchange public values A and B over an insecure channel</div>
+                <div class="calculation-step">5. 🧮 Alice calculates shared secret: B^a mod p</div>
+                <div class="calculation-step">6. 🧮 Bob calculates shared secret: A^b mod p</div>
+                <div class="calculation-step">7. ✅ Both arrive at the same shared secret: g^(ab) mod p</div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>🔒 Security Notes:</h3>
+            <ul>
+                <li><strong>Discrete Logarithm Problem:</strong> It's computationally hard to find 'a' given g, A, and p</li>
+                <li><strong>Public Information:</strong> p, g, A, and B are all public and can be intercepted</li>
+                <li><strong>Private Information:</strong> Only a and b remain secret to Alice and Bob respectively</li>
+                <li><strong>Man-in-the-Middle:</strong> This protocol doesn't authenticate the parties</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let sharedParameters = {
+            p: 23,
+            g: 5
+        };
+        
+        let currentStep = 0;
+        const totalSteps = 3;
+        let alicePublicValue = null;
+        let bobPublicValue = null;
+        let sharedSecret = null;
+
+        // Mathematical helper functions
+        function isPrime(num) {
+            if (num < 2) return false;
+            for(let i = 2; i <= Math.sqrt(num); i++) {
+                if(num % i === 0) return false;
+            }
+            return true;
+        }
+
+        function modPow(base, exponent, modulus) {
+            if(modulus === 1) return 0;
+            let result = 1;
+            base = base % modulus;
+            while(exponent > 0) {
+                if(exponent % 2 === 1) {
+                    result = (result * base) % modulus;
+                }
+                base = (base * base) % modulus;
+                exponent = Math.floor(exponent / 2);
+            }
+            return result;
+        }
+
+        function generateRandomPrime() {
+            const primes = [23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199];
+            const randomPrime = primes[Math.floor(Math.random() * primes.length)];
+            document.getElementById('prime-modulus').value = randomPrime;
+            
+            // Generate appropriate generator
+            const generators = [];
+            for(let g = 2; g < randomPrime; g++) {
+                if(isPrimitiveRoot(g, randomPrime)) {
+                    generators.push(g);
+                }
+            }
+            
+            if(generators.length > 0) {
+                document.getElementById('generator').value = generators[Math.floor(Math.random() * generators.length)];
+            } else {
+                document.getElementById('generator').value = Math.floor(Math.random() * (randomPrime - 3)) + 2;
+            }
+            
+            validateParameters();
+            showMessage('Random prime and generator generated!', 'success');
+        }
+
+        function isPrimitiveRoot(g, p) {
+            if (g >= p || g < 2) return false;
+            
+            // Simple check - in a real implementation, you'd check order
+            let seen = new Set();
+            let current = 1;
+            for(let i = 1; i < p; i++) {
+                current = (current * g) % p;
+                if(seen.has(current)) return false;
+                seen.add(current);
+            }
+            return seen.size === p - 1;
+        }
+
+        function validateParameters() {
+            const p = parseInt(document.getElementById('prime-modulus').value);
+            const g = parseInt(document.getElementById('generator').value);
+
+            if(!isPrime(p)) {
+                showMessage('Prime modulus must be prime!', 'error');
+                updateSecurityIndicator('invalid');
+                return false;
+            }
+
+            if(g >= p || g < 2) {
+                showMessage('Generator must be between 2 and p-1', 'error');
+                updateSecurityIndicator('invalid');
+                return false;
+            }
+
+            sharedParameters.p = p;
+            sharedParameters.g = g;
+            
+            // Update max values for private keys
+            document.getElementById('alice-private').max = p - 1;
+            document.getElementById('bob-private').max = p - 1;
+            
+            updateSecurityIndicator(getSecurityLevel(p));
+            showMessage('Parameters validated successfully!', 'success');
+            resetSimulation();
+            return true;
+        }
+
+        function getSecurityLevel(p) {
+            if(p < 100) return 'low';
+            if(p < 1000) return 'medium';
+            return 'high';
+        }
+
+        function updateSecurityIndicator(level) {
+            const indicator = document.getElementById('security-indicator');
+            let html = '';
+            
+            switch(level) {
+                case 'low':
+                    html = '<div class="security-level security-low">🔴 Low Security (Educational Use Only)</div>';
+                    break;
+                case 'medium':
+                    html = '<div class="security-level security-medium">🟡 Medium Security</div>';
+                    break;
+                case 'high':
+                    html = '<div class="security-level security-high">🟢 High Security</div>';
+                    break;
+                case 'invalid':
+                    html = '<div class="security-level security-low">❌ Invalid Parameters</div>';
+                    break;
+            }
+            
+            indicator.innerHTML = html;
+        }
+
+        function calculatePublicValues() {
+            if(!validateParameters()) return;
+
+            const a = parseInt(document.getElementById('alice-private').value);
+            const b = parseInt(document.getElementById('bob-private').value);
+
+            if(a >= sharedParameters.p || b >= sharedParameters.p || a < 1 || b < 1) {
+                showMessage('Private keys must be between 1 and p-1!', 'error');
+                return;
+            }
+
+            // Calculate public values with step-by-step breakdown
+            alicePublicValue = modPow(sharedParameters.g, a, sharedParameters.p);
+            bobPublicValue = modPow(sharedParameters.g, b, sharedParameters.p);
+
+            document.getElementById('alice-public').textContent = alicePublicValue;
+            document.getElementById('bob-public').textContent = bobPublicValue;
+
+            // Show detailed calculations
+            document.getElementById('alice-calculation').innerHTML = `
+                <div class="calculation-steps">
+                    <div class="calculation-step">A = ${sharedParameters.g}^${a} mod ${sharedParameters.p} = ${alicePublicValue}</div>
+                </div>
+            `;
+            
+            document.getElementById('bob-calculation').innerHTML = `
+                <div class="calculation-steps">
+                    <div class="calculation-step">B = ${sharedParameters.g}^${b} mod ${sharedParameters.p} = ${bobPublicValue}</div>
+                </div>
+            `;
+
+            // Update visualization
+            updateVisualization('publicValues');
+            
+            // Enable next step
+            document.getElementById('btn-step2').disabled = false;
+            document.getElementById('btn-step1').disabled = true;
+            
+            advanceStep();
+            showMessage('Public values calculated successfully!', 'success');
+        }
+
+        function exchangeValues() {
+            if(alicePublicValue === null || bobPublicValue === null) {
+                showMessage('Calculate public values first!', 'error');
+                return;
+            }
+
+            // Animate the exchange
+            updateVisualization('exchange');
+            
+            // Enable next step
+            document.getElementById('btn-step3').disabled = false;
+            document.getElementById('btn-step2').disabled = true;
+            
+            advanceStep();
+            showMessage('Public values exchanged over insecure channel!', 'success');
+            
+            // Add a brief animation
+            setTimeout(() => {
+                animateExchange();
+            }, 500);
+        }
+
+        function calculateSharedSecret() {
+            const a = parseInt(document.getElementById('alice-private').value);
+            const b = parseInt(document.getElementById('bob-private').value);
+
+            if(alicePublicValue === null || bobPublicValue === null) {
+                showMessage('Complete previous steps first!', 'error');
+                return;
+            }
+
+            // Calculate shared secrets
+            const aliceSecret = modPow(bobPublicValue, a, sharedParameters.p);
+            const bobSecret = modPow(alicePublicValue, b, sharedParameters.p);
+            
+            sharedSecret = aliceSecret;
+
+            // Verify they match
+            const success = aliceSecret === bobSecret;
+
+            document.getElementById('results').innerHTML = `
+                <h4>🔑 Shared Secret Calculation:</h4>
+                <div class="calculation-steps">
+                    <div class="calculation-step">
+                        <strong>Alice's calculation:</strong><br>
+                        Secret = B^a mod p = ${bobPublicValue}^${a} mod ${sharedParameters.p} = ${aliceSecret}
+                    </div>
+                    <div class="calculation-step">
+                        <strong>Bob's calculation:</strong><br>
+                        Secret = A^b mod p = ${alicePublicValue}^${b} mod ${sharedParameters.p} = ${bobSecret}
+                    </div>
+                    <div class="calculation-step" style="background-color: ${success ? '#e8f5e8' : '#ffebee'}; border-left: 4px solid ${success ? '#4caf50' : '#f44336'};">
+                        <strong>Result:</strong> ${success ? '✅ Shared secrets match!' : '❌ Error: Secrets do not match!'}<br>
+                        <strong>Final Shared Secret:</strong> ${sharedSecret}
+                    </div>
+                    <div class="calculation-step">
+                        <strong>Mathematical proof:</strong><br>
+                        g^(ab) mod p = ${sharedParameters.g}^(${a}×${b}) mod ${sharedParameters.p} = ${sharedSecret}
+                    </div>
+                </div>
+            `;
+
+            // Update visualization
+            updateVisualization('sharedSecret');
+            
+            // Update color mixes to show shared secret
+            const sharedColor = generateColor(sharedSecret);
+            document.getElementById('alice-color').style.backgroundColor = sharedColor;
+            document.getElementById('bob-color').style.backgroundColor = sharedColor;
+            
+            // Disable all step buttons
+            document.getElementById('btn-step3').disabled = true;
+            
+            advanceStep();
+            showMessage(success ? 'Shared secret established successfully!' : 'Error in calculation!', success ? 'success' : 'error');
+        }
+
+        function updateVisualization(stage) {
+            const viz = document.getElementById('exchange-visualization');
+            let html = '';
+
+            switch(stage) {
+                case 'publicValues':
+                    html = `
+                        <div>
+                            <h4>📢 Public Values Calculated</h4>
+                            <div class="math-box">
+                                <p><strong>Alice:</strong> A = g^a mod p = ${sharedParameters.g}^${document.getElementById('alice-private').value} mod ${sharedParameters.p} = ${alicePublicValue}</p>
+                                <p><strong>Bob:</strong> B = g^b mod p = ${sharedParameters.g}^${document.getElementById('bob-private').value} mod ${sharedParameters.p} = ${bobPublicValue}</p>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'exchange':
+                    html = `
+                        <div>
+                            <h4>🔄 Exchanging Public Values</h4>
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+                                <div>Alice sends A = ${alicePublicValue}</div>
+                                <div class="arrow">⟷</div>
+                                <div>Bob sends B = ${bobPublicValue}</div>
+                            </div>
+                            <p style="margin-top: 15px; font-style: italic;">🌐 These values are sent over an insecure channel</p>
+                        </div>
+                    `;
+                    break;
+                case 'sharedSecret':
+                    html = `
+                        <div>
+                            <h4>🎉 Shared Secret Established!</h4>
+                            <div class="math-box">
+                                <p><strong>Shared Secret:</strong> ${sharedSecret}</p>
+                                <p><strong>Both parties can now use this secret for secure communication!</strong></p>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+
+            viz.innerHTML = html;
+            updateStepIndicators();
+        }
+
+        function updateStepIndicators() {
+            const steps = ['Calculate Public Values', 'Exchange Values', 'Calculate Shared Secret'];
+            let stepsHtml = '<div class="steps-indicator">';
+            
+            steps.forEach((step, index) => {
+                const status = index < currentStep ? 'completed' : 
+                             index === currentStep ? 'current' : 'pending';
+                stepsHtml += `
+                    <div class="step-indicator ${status}">
+                        <div class="step-number">${index + 1}</div>
+                        <div class="step-label">${step}</div>
+                    </div>
+                `;
+            });
+            
+            stepsHtml += '</div>';
+            
+            // Append to visualization if not already showing steps
+            const viz = document.getElementById('exchange-visualization');
+            if(!viz.innerHTML.includes('steps-indicator')) {
+                viz.innerHTML += stepsHtml;
+            }
+        }
+
+        function advanceStep() {
+            currentStep++;
+            updateProgress((currentStep / totalSteps) * 100);
+        }
+
+        function updateProgress(percent) {
+            const progressFill = document.getElementById('main-progress');
+            progressFill.style.width = `${percent}%`;
+        }
+
+        function resetSimulation() {
+            currentStep = 0;
+            alicePublicValue = null;
+            bobPublicValue = null;
+            sharedSecret = null;
+            
+            // Reset displays
+            document.getElementById('alice-public').textContent = '-';
+            document.getElementById('bob-public').textContent = '-';
+            document.getElementById('alice-calculation').innerHTML = '';
+            document.getElementById('bob-calculation').innerHTML = '';
+            document.getElementById('results').innerHTML = '<p>Complete the steps above to see the detailed results...</p>';
+            document.getElementById('exchange-visualization').innerHTML = '<p>🚀 Ready to start the key exchange process!</p>';
+            
+            // Reset buttons
+            document.getElementById('btn-step1').disabled = false;
+            document.getElementById('btn-step2').disabled = true;
+            document.getElementById('btn-step3').disabled = true;
+            
+            // Reset progress
+            updateProgress(0);
+            
+            // Reset colors
+            updateColorMixes();
+            
+            showMessage('Simulation reset!', 'info');
+        }
+
+        function updateColorMixes() {
+            const aliceColor = document.getElementById('alice-color');
+            const bobColor = document.getElementById('bob-color');
+
+            aliceColor.style.backgroundColor = generateColor(document.getElementById('alice-private').value);
+            bobColor.style.backgroundColor = generateColor(document.getElementById('bob-private').value);
+        }
+
+        function generateColor(value) {
+            const hue = (value * 30) % 360;
+            return `hsl(${hue}, 70%, 50%)`;
+        }
+
+        function animateExchange() {
+            const arrows = document.querySelectorAll('.arrow');
+            arrows.forEach(arrow => {
+                arrow.style.animation = 'none';
+                setTimeout(() => {
+                    arrow.style.animation = 'pulse 1s infinite';
+                }, 100);
+            });
+        }
+
+        function exportResults() {
+            if(sharedSecret === null) {
+                showMessage('Complete the key exchange first!', 'error');
+                return;
+            }
+            
+            const results = {
+                timestamp: new Date().toISOString(),
+                parameters: {
+                    prime: sharedParameters.p,
+                    generator: sharedParameters.g
+                },
+                privateKeys: {
+                    alice: parseInt(document.getElementById('alice-private').value),
+                    bob: parseInt(document.getElementById('bob-private').value)
+                },
+                publicValues: {
+                    alice: alicePublicValue,
+                    bob: bobPublicValue
+                },
+                sharedSecret: sharedSecret,
+                calculations: {
+                    alicePublic: `${sharedParameters.g}^${document.getElementById('alice-private').value} mod ${sharedParameters.p} = ${alicePublicValue}`,
+                    bobPublic: `${sharedParameters.g}^${document.getElementById('bob-private').value} mod ${sharedParameters.p} = ${bobPublicValue}`,
+                    aliceSecret: `${bobPublicValue}^${document.getElementById('alice-private').value} mod ${sharedParameters.p} = ${sharedSecret}`,
+                    bobSecret: `${alicePublicValue}^${document.getElementById('bob-private').value} mod ${sharedParameters.p} = ${sharedSecret}`
+                }
+            };
+            
+            const blob = new Blob([JSON.stringify(results, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `diffie-hellman-results-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            URL.revokeObjectURL(url);
+            showMessage('Results exported successfully!', 'success');
+        }
+
+        function showMessage(text, type) {
+            // Remove existing messages
+            const existingMessages = document.querySelectorAll('.message');
+            existingMessages.forEach(msg => msg.remove());
+            
+            const message = document.createElement('div');
+            message.className = `message`;
+            message.style.backgroundColor = type === 'error' ? '#e74c3c' : 
+                                          type === 'success' ? '#27ae60' : 
+                                          '#3498db';
+            message.textContent = text;
+            document.body.appendChild(message);
+            setTimeout(() => {
+                if(message.parentNode) {
+                    message.remove();
+                }
+            }, 4000);
+        }
+
+        function addInputListeners() {
+            // Parameter change listeners
+            document.getElementById('prime-modulus').addEventListener('change', validateParameters);
+            document.getElementById('generator').addEventListener('change', validateParameters);
+
+            // Private key change listeners
+            document.getElementById('alice-private').addEventListener('input', function() {
+                updateColorMixes();
+                if(currentStep > 0) resetSimulation();
+            });
+            
+            document.getElementById('bob-private').addEventListener('input', function() {
+                updateColorMixes();
+                if(currentStep > 0) resetSimulation();
+            });
+
+            // Input validation
+            const numericInputs = document.querySelectorAll('input[type="number"]');
+            numericInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+            });
+        }
+
+        // Initialize everything when page loads
+        window.addEventListener('load', function() {
+            validateParameters();
+            updateColorMixes();
+            addInputListeners();
+            updateStepIndicators();
+            showMessage('🎉 Welcome to the Enhanced Diffie-Hellman Simulator!', 'info');
+        });
+    </script>
+</body>
+</html>
