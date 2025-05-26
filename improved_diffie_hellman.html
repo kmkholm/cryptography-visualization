@@ -82,11 +82,16 @@
             transform: translateY(-5px);
         }
 
-        .grid {
+        .participants-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 25px;
             margin: 25px 0;
+            transition: all 0.5s ease;
+        }
+
+        .participants-grid.attack-mode {
+            grid-template-columns: repeat(3, 1fr);
         }
 
         .participant {
@@ -117,6 +122,17 @@
         .participant:hover {
             transform: scale(1.02);
             box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .participant.attacker {
+            border-color: #f44336;
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            animation: attackerPulse 2s infinite;
+        }
+
+        @keyframes attackerPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0.1); }
         }
 
         .exchange-area {
@@ -443,7 +459,11 @@
         }
 
         @media (max-width: 768px) {
-            .grid {
+            .participants-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .participants-grid.attack-mode {
                 grid-template-columns: 1fr;
             }
             
@@ -484,7 +504,23 @@
             </div>
         </div>
 
-        <div class="grid">
+        <div class="section">
+            <h2>🚨 Attack Simulation</h2>
+            <div class="info-box">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="enable-attack" onchange="toggleAttack()">
+                        <span style="font-weight: bold;">Enable Man-in-the-Middle Attack</span>
+                    </label>
+                </div>
+                <div id="attack-warning" style="display: none; padding: 15px; background-color: #ffebee; border: 2px solid #f44336; border-radius: 10px; margin-top: 10px;">
+                    <strong>⚠️ ATTACK MODE ENABLED!</strong><br>
+                    Eve is now intercepting all communications between Alice and Bob.
+                </div>
+            </div>
+        </div>
+
+        <div class="participants-grid">
             <div class="participant" id="alice">
                 <h3>👩‍💻 Alice</h3>
                 <div class="info-box">
@@ -492,6 +528,18 @@
                     <div class="color-mix" id="alice-color" title="Alice's secret color"></div>
                     <p><strong>Public Value A:</strong> <span id="alice-public">-</span></p>
                     <div id="alice-calculation"></div>
+                    <div id="alice-secret-display"></div>
+                </div>
+            </div>
+
+            <div class="participant attacker" id="eve" style="display: none;">
+                <h3>🕵️‍♀️ Eve (Attacker)</h3>
+                <div class="info-box">
+                    <p>Private Key (e): <input type="number" id="eve-private" min="1" max="22" value="9"></p>
+                    <div class="color-mix" id="eve-color" title="Eve's secret color"></div>
+                    <p><strong>Public Value E:</strong> <span id="eve-public">-</span></p>
+                    <div id="eve-calculation"></div>
+                    <div id="eve-secrets-display"></div>
                 </div>
             </div>
 
@@ -502,6 +550,7 @@
                     <div class="color-mix" id="bob-color" title="Bob's secret color"></div>
                     <p><strong>Public Value B:</strong> <span id="bob-public">-</span></p>
                     <div id="bob-calculation"></div>
+                    <div id="bob-secret-display"></div>
                 </div>
             </div>
         </div>
@@ -541,6 +590,43 @@
         </div>
 
         <div class="info-box">
+            <h3>🚨 Man-in-the-Middle Attack Explained:</h3>
+            <div class="calculation-steps">
+                <div class="calculation-step" style="background-color: #ffebee;">
+                    <strong>The Vulnerability:</strong> Diffie-Hellman has no built-in authentication mechanism
+                </div>
+                <div class="calculation-step">
+                    <strong>1. Setup:</strong> Eve positions herself between Alice and Bob's communication
+                </div>
+                <div class="calculation-step">
+                    <strong>2. Interception:</strong> Eve intercepts Alice's public key A and Bob's public key B
+                </div>
+                <div class="calculation-step">
+                    <strong>3. Substitution:</strong> Eve sends her own public key E to both Alice and Bob
+                </div>
+                <div class="calculation-step">
+                    <strong>4. Deception:</strong> Alice thinks E came from Bob, Bob thinks E came from Alice
+                </div>
+                <div class="calculation-step">
+                    <strong>5. Double Secrets:</strong> Eve shares one secret with Alice and another with Bob
+                </div>
+                <div class="calculation-step" style="background-color: #fff3e0;">
+                    <strong>6. Total Control:</strong> Eve can decrypt, read, modify, and re-encrypt all messages
+                </div>
+            </div>
+            <div style="background-color: #e8f5e8; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                <p><strong>🛡️ Real-world Protections:</strong></p>
+                <ul style="text-align: left; margin: 10px 0;">
+                    <li><strong>Digital Certificates:</strong> Cryptographically signed public keys</li>
+                    <li><strong>Public Key Infrastructure (PKI):</strong> Trusted certificate authorities</li>
+                    <li><strong>Perfect Forward Secrecy:</strong> Ephemeral keys that change frequently</li>
+                    <li><strong>Authenticated Key Exchange:</strong> Protocols like Station-to-Station (STS)</li>
+                    <li><strong>Out-of-band Verification:</strong> Verify public keys through separate channels</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="info-box">
             <h3>🔒 Security Notes:</h3>
             <ul>
                 <li><strong>Discrete Logarithm Problem:</strong> It's computationally hard to find 'a' given g, A, and p</li>
@@ -561,7 +647,11 @@
         const totalSteps = 3;
         let alicePublicValue = null;
         let bobPublicValue = null;
+        let evePublicValue = null;
         let sharedSecret = null;
+        let attackMode = false;
+        let aliceSecretWithEve = null;
+        let bobSecretWithEve = null;
 
         // Mathematical helper functions
         function isPrime(num) {
@@ -586,33 +676,10 @@
             return result;
         }
 
-        function generateRandomPrime() {
-            const primes = [23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199];
-            const randomPrime = primes[Math.floor(Math.random() * primes.length)];
-            document.getElementById('prime-modulus').value = randomPrime;
-            
-            // Generate appropriate generator
-            const generators = [];
-            for(let g = 2; g < randomPrime; g++) {
-                if(isPrimitiveRoot(g, randomPrime)) {
-                    generators.push(g);
-                }
-            }
-            
-            if(generators.length > 0) {
-                document.getElementById('generator').value = generators[Math.floor(Math.random() * generators.length)];
-            } else {
-                document.getElementById('generator').value = Math.floor(Math.random() * (randomPrime - 3)) + 2;
-            }
-            
-            validateParameters();
-            showMessage('Random prime and generator generated!', 'success');
-        }
-
         function isPrimitiveRoot(g, p) {
             if (g >= p || g < 2) return false;
             
-            // Simple check - in a real implementation, you'd check order
+            // Simple check for small primes
             let seen = new Set();
             let current = 1;
             for(let i = 1; i < p; i++) {
@@ -621,6 +688,44 @@
                 seen.add(current);
             }
             return seen.size === p - 1;
+        }
+
+        function toggleAttack() {
+            attackMode = document.getElementById('enable-attack').checked;
+            const eveParticipant = document.getElementById('eve');
+            const attackWarning = document.getElementById('attack-warning');
+            const participantsGrid = document.querySelector('.participants-grid');
+            
+            if (attackMode) {
+                eveParticipant.style.display = 'block';
+                attackWarning.style.display = 'block';
+                participantsGrid.classList.add('attack-mode');
+                showMessage('🚨 Attack mode enabled! Eve will intercept communications.', 'error');
+            } else {
+                eveParticipant.style.display = 'none';
+                attackWarning.style.display = 'none';
+                participantsGrid.classList.remove('attack-mode');
+                showMessage('🔒 Secure mode restored.', 'success');
+            }
+            
+            resetSimulation();
+        }
+
+        function generateRandomPrime() {
+            const primes = [23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199];
+            const randomPrime = primes[Math.floor(Math.random() * primes.length)];
+            document.getElementById('prime-modulus').value = randomPrime;
+            
+            // Generate appropriate generator (simple approach for educational purposes)
+            let generator = 2;
+            for(let g = 2; g < Math.min(randomPrime, 20); g++) {
+                generator = g;
+                break; // Use first available for simplicity
+            }
+            
+            document.getElementById('generator').value = generator;
+            validateParameters();
+            showMessage('Random prime and generator generated!', 'success');
         }
 
         function validateParameters() {
@@ -645,6 +750,9 @@
             // Update max values for private keys
             document.getElementById('alice-private').max = p - 1;
             document.getElementById('bob-private').max = p - 1;
+            if(attackMode) {
+                document.getElementById('eve-private').max = p - 1;
+            }
             
             updateSecurityIndicator(getSecurityLevel(p));
             showMessage('Parameters validated successfully!', 'success');
@@ -691,7 +799,7 @@
                 return;
             }
 
-            // Calculate public values with step-by-step breakdown
+            // Calculate Alice and Bob's public values
             alicePublicValue = modPow(sharedParameters.g, a, sharedParameters.p);
             bobPublicValue = modPow(sharedParameters.g, b, sharedParameters.p);
 
@@ -711,6 +819,24 @@
                 </div>
             `;
 
+            // If attack mode is enabled, calculate Eve's public values
+            if (attackMode) {
+                const e = parseInt(document.getElementById('eve-private').value);
+                if(e >= sharedParameters.p || e < 1) {
+                    showMessage('Eve\'s private key must be between 1 and p-1!', 'error');
+                    return;
+                }
+                
+                evePublicValue = modPow(sharedParameters.g, e, sharedParameters.p);
+                document.getElementById('eve-public').textContent = evePublicValue;
+                
+                document.getElementById('eve-calculation').innerHTML = `
+                    <div class="calculation-steps">
+                        <div class="calculation-step">E = ${sharedParameters.g}^${e} mod ${sharedParameters.p} = ${evePublicValue}</div>
+                    </div>
+                `;
+            }
+
             // Update visualization
             updateVisualization('publicValues');
             
@@ -728,7 +854,7 @@
                 return;
             }
 
-            // Animate the exchange
+            // Update visualization
             updateVisualization('exchange');
             
             // Enable next step
@@ -753,50 +879,132 @@
                 return;
             }
 
-            // Calculate shared secrets
-            const aliceSecret = modPow(bobPublicValue, a, sharedParameters.p);
-            const bobSecret = modPow(alicePublicValue, b, sharedParameters.p);
-            
-            sharedSecret = aliceSecret;
+            if (attackMode) {
+                // Man-in-the-middle attack scenario
+                const e = parseInt(document.getElementById('eve-private').value);
+                
+                // Alice thinks she's communicating with Bob, but she's actually with Eve
+                aliceSecretWithEve = modPow(evePublicValue, a, sharedParameters.p);
+                
+                // Bob thinks he's communicating with Alice, but he's actually with Eve
+                bobSecretWithEve = modPow(evePublicValue, b, sharedParameters.p);
+                
+                // Eve can calculate shared secrets with both Alice and Bob
+                const eveSecretWithAlice = modPow(alicePublicValue, e, sharedParameters.p);
+                const eveSecretWithBob = modPow(bobPublicValue, e, sharedParameters.p);
 
-            // Verify they match
-            const success = aliceSecret === bobSecret;
+                document.getElementById('results').innerHTML = `
+                    <h4>🚨 Man-in-the-Middle Attack Results:</h4>
+                    <div class="calculation-steps">
+                        <div class="calculation-step" style="background-color: #ffebee; border-left: 4px solid #f44336;">
+                            <strong>❌ ATTACK SUCCESSFUL!</strong><br>
+                            Alice and Bob think they share a secret, but Eve can decrypt everything!
+                        </div>
+                        <div class="calculation-step">
+                            <strong>Alice's calculation (thinks she's with Bob):</strong><br>
+                            Secret = E^a mod p = ${evePublicValue}^${a} mod ${sharedParameters.p} = ${aliceSecretWithEve}
+                        </div>
+                        <div class="calculation-step">
+                            <strong>Bob's calculation (thinks he's with Alice):</strong><br>
+                            Secret = E^b mod p = ${evePublicValue}^${b} mod ${sharedParameters.p} = ${bobSecretWithEve}
+                        </div>
+                        <div class="calculation-step">
+                            <strong>Eve's secrets:</strong><br>
+                            With Alice: A^e mod p = ${alicePublicValue}^${e} mod ${sharedParameters.p} = ${eveSecretWithAlice}<br>
+                            With Bob: B^e mod p = ${bobPublicValue}^${e} mod ${sharedParameters.p} = ${eveSecretWithBob}
+                        </div>
+                        <div class="calculation-step" style="background-color: #fff3e0; border-left: 4px solid #ff9800;">
+                            <strong>⚠️ Security Breach:</strong><br>
+                            • Alice and Bob have different "shared" secrets<br>
+                            • Eve can decrypt messages from both parties<br>
+                            • Eve can modify and re-encrypt messages<br>
+                            • This is why authentication is crucial!
+                        </div>
+                    </div>
+                `;
 
-            document.getElementById('results').innerHTML = `
-                <h4>🔑 Shared Secret Calculation:</h4>
-                <div class="calculation-steps">
-                    <div class="calculation-step">
-                        <strong>Alice's calculation:</strong><br>
-                        Secret = B^a mod p = ${bobPublicValue}^${a} mod ${sharedParameters.p} = ${aliceSecret}
+                // Show different secrets in participant displays
+                document.getElementById('alice-secret-display').innerHTML = `
+                    <div class="calculation-steps">
+                        <div class="calculation-step" style="background-color: #ffebee;">
+                            <strong>Alice's "shared" secret:</strong> ${aliceSecretWithEve}
+                        </div>
                     </div>
-                    <div class="calculation-step">
-                        <strong>Bob's calculation:</strong><br>
-                        Secret = A^b mod p = ${alicePublicValue}^${b} mod ${sharedParameters.p} = ${bobSecret}
+                `;
+                
+                document.getElementById('bob-secret-display').innerHTML = `
+                    <div class="calculation-steps">
+                        <div class="calculation-step" style="background-color: #ffebee;">
+                            <strong>Bob's "shared" secret:</strong> ${bobSecretWithEve}
+                        </div>
                     </div>
-                    <div class="calculation-step" style="background-color: ${success ? '#e8f5e8' : '#ffebee'}; border-left: 4px solid ${success ? '#4caf50' : '#f44336'};">
-                        <strong>Result:</strong> ${success ? '✅ Shared secrets match!' : '❌ Error: Secrets do not match!'}<br>
-                        <strong>Final Shared Secret:</strong> ${sharedSecret}
+                `;
+                
+                document.getElementById('eve-secrets-display').innerHTML = `
+                    <div class="calculation-steps">
+                        <div class="calculation-step" style="background-color: #e8f5e8;">
+                            <strong>Eve's secrets:</strong><br>
+                            With Alice: ${eveSecretWithAlice}<br>
+                            With Bob: ${eveSecretWithBob}
+                        </div>
                     </div>
-                    <div class="calculation-step">
-                        <strong>Mathematical proof:</strong><br>
-                        g^(ab) mod p = ${sharedParameters.g}^(${a}×${b}) mod ${sharedParameters.p} = ${sharedSecret}
+                `;
+
+                // Update color mixes to show different secrets
+                document.getElementById('alice-color').style.backgroundColor = generateColor(aliceSecretWithEve);
+                document.getElementById('bob-color').style.backgroundColor = generateColor(bobSecretWithEve);
+                document.getElementById('eve-color').style.backgroundColor = generateColor(eveSecretWithAlice + eveSecretWithBob);
+
+            } else {
+                // Normal scenario - direct communication
+                const aliceSecret = modPow(bobPublicValue, a, sharedParameters.p);
+                const bobSecret = modPow(alicePublicValue, b, sharedParameters.p);
+                
+                sharedSecret = aliceSecret;
+                const success = aliceSecret === bobSecret;
+
+                document.getElementById('results').innerHTML = `
+                    <h4>🔑 Shared Secret Calculation:</h4>
+                    <div class="calculation-steps">
+                        <div class="calculation-step">
+                            <strong>Alice's calculation:</strong><br>
+                            Secret = B^a mod p = ${bobPublicValue}^${a} mod ${sharedParameters.p} = ${aliceSecret}
+                        </div>
+                        <div class="calculation-step">
+                            <strong>Bob's calculation:</strong><br>
+                            Secret = A^b mod p = ${alicePublicValue}^${b} mod ${sharedParameters.p} = ${bobSecret}
+                        </div>
+                        <div class="calculation-step" style="background-color: ${success ? '#e8f5e8' : '#ffebee'}; border-left: 4px solid ${success ? '#4caf50' : '#f44336'};">
+                            <strong>Result:</strong> ${success ? '✅ Shared secrets match!' : '❌ Error: Secrets do not match!'}<br>
+                            <strong>Final Shared Secret:</strong> ${sharedSecret}
+                        </div>
+                        <div class="calculation-step">
+                            <strong>Mathematical proof:</strong><br>
+                            g^(ab) mod p = ${sharedParameters.g}^(${a}×${b}) mod ${sharedParameters.p} = ${sharedSecret}
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+
+                // Update color mixes to show shared secret
+                const sharedColor = generateColor(sharedSecret);
+                document.getElementById('alice-color').style.backgroundColor = sharedColor;
+                document.getElementById('bob-color').style.backgroundColor = sharedColor;
+                
+                // Clear secret displays
+                document.getElementById('alice-secret-display').innerHTML = '';
+                document.getElementById('bob-secret-display').innerHTML = '';
+            }
 
             // Update visualization
             updateVisualization('sharedSecret');
-            
-            // Update color mixes to show shared secret
-            const sharedColor = generateColor(sharedSecret);
-            document.getElementById('alice-color').style.backgroundColor = sharedColor;
-            document.getElementById('bob-color').style.backgroundColor = sharedColor;
             
             // Disable all step buttons
             document.getElementById('btn-step3').disabled = true;
             
             advanceStep();
-            showMessage(success ? 'Shared secret established successfully!' : 'Error in calculation!', success ? 'success' : 'error');
+            const message = attackMode ? 'Attack simulation complete - Eve has intercepted everything!' : 'Shared secret established successfully!';
+            const type = attackMode ? 'error' : 'success';
+            showMessage(message, type);
         }
 
         function updateVisualization(stage) {
@@ -805,39 +1013,110 @@
 
             switch(stage) {
                 case 'publicValues':
-                    html = `
-                        <div>
-                            <h4>📢 Public Values Calculated</h4>
-                            <div class="math-box">
-                                <p><strong>Alice:</strong> A = g^a mod p = ${sharedParameters.g}^${document.getElementById('alice-private').value} mod ${sharedParameters.p} = ${alicePublicValue}</p>
-                                <p><strong>Bob:</strong> B = g^b mod p = ${sharedParameters.g}^${document.getElementById('bob-private').value} mod ${sharedParameters.p} = ${bobPublicValue}</p>
+                    if (attackMode) {
+                        html = `
+                            <div>
+                                <h4>📢 Public Values Calculated (Attack Mode)</h4>
+                                <div class="math-box">
+                                    <p><strong>Alice:</strong> A = g^a mod p = ${sharedParameters.g}^${document.getElementById('alice-private').value} mod ${sharedParameters.p} = ${alicePublicValue}</p>
+                                    <p><strong>Bob:</strong> B = g^b mod p = ${sharedParameters.g}^${document.getElementById('bob-private').value} mod ${sharedParameters.p} = ${bobPublicValue}</p>
+                                    <p style="color: #f44336;"><strong>Eve:</strong> E = g^e mod p = ${sharedParameters.g}^${document.getElementById('eve-private').value} mod ${sharedParameters.p} = ${evePublicValue}</p>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        html = `
+                            <div>
+                                <h4>📢 Public Values Calculated</h4>
+                                <div class="math-box">
+                                    <p><strong>Alice:</strong> A = g^a mod p = ${sharedParameters.g}^${document.getElementById('alice-private').value} mod ${sharedParameters.p} = ${alicePublicValue}</p>
+                                    <p><strong>Bob:</strong> B = g^b mod p = ${sharedParameters.g}^${document.getElementById('bob-private').value} mod ${sharedParameters.p} = ${bobPublicValue}</p>
+                                </div>
+                            </div>
+                        `;
+                    }
                     break;
                 case 'exchange':
-                    html = `
-                        <div>
-                            <h4>🔄 Exchanging Public Values</h4>
-                            <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
-                                <div>Alice sends A = ${alicePublicValue}</div>
-                                <div class="arrow">⟷</div>
-                                <div>Bob sends B = ${bobPublicValue}</div>
+                    if (attackMode) {
+                        html = `
+                            <div>
+                                <h4>🚨 Man-in-the-Middle Attack in Progress!</h4>
+                                <div style="background-color: #ffebee; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                                    <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 10px; text-align: center; margin-bottom: 10px;">
+                                        <div><strong>Alice</strong><br>Sends A = ${alicePublicValue}</div>
+                                        <div class="arrow" style="color: #f44336;">→</div>
+                                        <div style="background-color: #f44336; color: white; padding: 10px; border-radius: 5px;">
+                                            <strong>Eve</strong><br>
+                                            Intercepts A<br>
+                                            Sends E = ${evePublicValue}
+                                        </div>
+                                        <div class="arrow" style="color: #f44336;">→</div>
+                                        <div><strong>Bob</strong><br>Receives E = ${evePublicValue}<br>(thinks it's A)</div>
+                                    </div>
+                                    <div style="margin: 15px 0; text-align: center; font-style: italic;">⬇️ Return Traffic ⬇️</div>
+                                    <div style="display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: center; gap: 10px; text-align: center;">
+                                        <div><strong>Alice</strong><br>Receives E = ${evePublicValue}<br>(thinks it's B)</div>
+                                        <div class="arrow" style="color: #f44336;">←</div>
+                                        <div style="background-color: #f44336; color: white; padding: 10px; border-radius: 5px;">
+                                            <strong>Eve</strong><br>
+                                            Intercepts B<br>
+                                            Sends E = ${evePublicValue}
+                                        </div>
+                                        <div class="arrow" style="color: #f44336;">←</div>
+                                        <div><strong>Bob</strong><br>Sends B = ${bobPublicValue}</div>
+                                    </div>
+                                </div>
+                                <p style="color: #f44336; font-weight: bold; text-align: center;">
+                                    🔴 Alice and Bob think they're communicating directly, but Eve is intercepting everything!
+                                </p>
                             </div>
-                            <p style="margin-top: 15px; font-style: italic;">🌐 These values are sent over an insecure channel</p>
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        html = `
+                            <div>
+                                <h4>🔄 Exchanging Public Values</h4>
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
+                                    <div>Alice sends A = ${alicePublicValue}</div>
+                                    <div class="arrow">⟷</div>
+                                    <div>Bob sends B = ${bobPublicValue}</div>
+                                </div>
+                                <p style="margin-top: 15px; font-style: italic;">🌐 These values are sent over an insecure channel</p>
+                            </div>
+                        `;
+                    }
                     break;
                 case 'sharedSecret':
-                    html = `
-                        <div>
-                            <h4>🎉 Shared Secret Established!</h4>
-                            <div class="math-box">
-                                <p><strong>Shared Secret:</strong> ${sharedSecret}</p>
-                                <p><strong>Both parties can now use this secret for secure communication!</strong></p>
+                    if (attackMode) {
+                        html = `
+                            <div>
+                                <h4>🚨 Attack Complete - Eve Controls All Communication!</h4>
+                                <div class="math-box" style="background-color: #ffebee;">
+                                    <p><strong>Alice thinks her shared secret is:</strong> ${aliceSecretWithEve}</p>
+                                    <p><strong>Bob thinks his shared secret is:</strong> ${bobSecretWithEve}</p>
+                                    <p style="color: #f44336;"><strong>Eve can decrypt messages from both parties!</strong></p>
+                                </div>
+                                <div style="background-color: #fff3e0; padding: 15px; border-radius: 10px; margin-top: 15px;">
+                                    <p><strong>🛡️ How to prevent this attack:</strong></p>
+                                    <ul style="text-align: left; margin: 10px 0;">
+                                        <li>Use digital certificates for authentication</li>
+                                        <li>Implement public key infrastructure (PKI)</li>
+                                        <li>Use authenticated key exchange protocols</li>
+                                        <li>Verify public keys through trusted channels</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        html = `
+                            <div>
+                                <h4>🎉 Shared Secret Established!</h4>
+                                <div class="math-box">
+                                    <p><strong>Shared Secret:</strong> ${sharedSecret}</p>
+                                    <p><strong>Both parties can now use this secret for secure communication!</strong></p>
+                                </div>
+                            </div>
+                        `;
+                    }
                     break;
             }
 
@@ -883,13 +1162,21 @@
             currentStep = 0;
             alicePublicValue = null;
             bobPublicValue = null;
+            evePublicValue = null;
             sharedSecret = null;
+            aliceSecretWithEve = null;
+            bobSecretWithEve = null;
             
             // Reset displays
             document.getElementById('alice-public').textContent = '-';
             document.getElementById('bob-public').textContent = '-';
+            document.getElementById('eve-public').textContent = '-';
             document.getElementById('alice-calculation').innerHTML = '';
             document.getElementById('bob-calculation').innerHTML = '';
+            document.getElementById('eve-calculation').innerHTML = '';
+            document.getElementById('alice-secret-display').innerHTML = '';
+            document.getElementById('bob-secret-display').innerHTML = '';
+            document.getElementById('eve-secrets-display').innerHTML = '';
             document.getElementById('results').innerHTML = '<p>Complete the steps above to see the detailed results...</p>';
             document.getElementById('exchange-visualization').innerHTML = '<p>🚀 Ready to start the key exchange process!</p>';
             
@@ -910,9 +1197,13 @@
         function updateColorMixes() {
             const aliceColor = document.getElementById('alice-color');
             const bobColor = document.getElementById('bob-color');
+            const eveColor = document.getElementById('eve-color');
 
             aliceColor.style.backgroundColor = generateColor(document.getElementById('alice-private').value);
             bobColor.style.backgroundColor = generateColor(document.getElementById('bob-private').value);
+            if (attackMode) {
+                eveColor.style.backgroundColor = generateColor(document.getElementById('eve-private').value);
+            }
         }
 
         function generateColor(value) {
@@ -931,31 +1222,33 @@
         }
 
         function exportResults() {
-            if(sharedSecret === null) {
+            if(sharedSecret === null && !attackMode) {
                 showMessage('Complete the key exchange first!', 'error');
                 return;
             }
             
             const results = {
                 timestamp: new Date().toISOString(),
+                attackMode: attackMode,
                 parameters: {
                     prime: sharedParameters.p,
                     generator: sharedParameters.g
                 },
                 privateKeys: {
                     alice: parseInt(document.getElementById('alice-private').value),
-                    bob: parseInt(document.getElementById('bob-private').value)
+                    bob: parseInt(document.getElementById('bob-private').value),
+                    eve: attackMode ? parseInt(document.getElementById('eve-private').value) : null
                 },
                 publicValues: {
                     alice: alicePublicValue,
-                    bob: bobPublicValue
+                    bob: bobPublicValue,
+                    eve: evePublicValue
                 },
-                sharedSecret: sharedSecret,
-                calculations: {
-                    alicePublic: `${sharedParameters.g}^${document.getElementById('alice-private').value} mod ${sharedParameters.p} = ${alicePublicValue}`,
-                    bobPublic: `${sharedParameters.g}^${document.getElementById('bob-private').value} mod ${sharedParameters.p} = ${bobPublicValue}`,
-                    aliceSecret: `${bobPublicValue}^${document.getElementById('alice-private').value} mod ${sharedParameters.p} = ${sharedSecret}`,
-                    bobSecret: `${alicePublicValue}^${document.getElementById('bob-private').value} mod ${sharedParameters.p} = ${sharedSecret}`
+                secrets: attackMode ? {
+                    aliceWithEve: aliceSecretWithEve,
+                    bobWithEve: bobSecretWithEve
+                } : {
+                    shared: sharedSecret
                 }
             };
             
@@ -1004,6 +1297,11 @@
             });
             
             document.getElementById('bob-private').addEventListener('input', function() {
+                updateColorMixes();
+                if(currentStep > 0) resetSimulation();
+            });
+            
+            document.getElementById('eve-private').addEventListener('input', function() {
                 updateColorMixes();
                 if(currentStep > 0) resetSimulation();
             });
