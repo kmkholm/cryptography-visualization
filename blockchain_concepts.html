@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blockchain Technology - Interactive Lecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .author {
+            font-size: 1rem;
+            margin-top: 1rem;
+            color: #ffd700;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #ffd700;
+            text-align: center;
+        }
+
+        .blockchain-demo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+            overflow-x: auto;
+            padding: 1rem;
+        }
+
+        .block {
+            width: 200px;
+            height: 150px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: 3px solid #fff;
+            border-radius: 10px;
+            margin: 0 10px;
+            padding: 15px;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .block:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.4);
+        }
+
+        .block-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .block-content {
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .chain-link {
+            width: 40px;
+            height: 6px;
+            background: #ffd700;
+            position: absolute;
+            right: -23px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 3px;
+        }
+
+        .chain-link::before {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: -7px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #ffd700;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+
+        .mining-demo {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .miner {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            animation: mining 2s infinite;
+            margin: 10px;
+        }
+
+        @keyframes mining {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .network-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .node {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+
+        .transaction-flow {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .transaction-step {
+            background: rgba(255,255,255,0.2);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+            margin: 0.5rem;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .transaction-step::after {
+            content: '→';
+            position: absolute;
+            right: -15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            color: #ffd700;
+        }
+
+        .transaction-step:last-child::after {
+            display: none;
+        }
+
+        .interactive-button {
+            background: linear-gradient(45deg, #ffd700, #f39c12);
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 1rem 0.5rem;
+        }
+
+        .interactive-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3);
+        }
+
+        .blockchain-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .blockchain-type {
+            background: rgba(255,255,255,0.15);
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .blockchain-type:hover {
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.25);
+        }
+
+        .type-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .consensus-demo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .consensus-mechanism {
+            background: rgba(255,255,255,0.2);
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 1rem;
+            text-align: center;
+            min-width: 250px;
+            transition: all 0.3s ease;
+        }
+
+        .consensus-mechanism:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-5px);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            border-left: 4px solid #ffd700;
+        }
+
+        .crypto-animation {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #ffd700;
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: spin 2s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .use-cases {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .use-case {
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.2));
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .use-case:hover {
+            transform: scale(1.05);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #f39c12);
+            width: 0%;
+            transition: width 2s ease;
+            border-radius: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .block {
+                width: 150px;
+                height: 120px;
+                padding: 10px;
+            }
+            
+            .blockchain-demo {
+                flex-direction: column;
+            }
+            
+            .chain-link {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔗 Blockchain Technology</h1>
+        <div class="subtitle">Understanding the Foundation of Digital Trust</div>
+        <div class="author"> Dr. Mohammed Tawfik</div>
+    </div>
+
+    <div class="container">
+        <!-- Introduction Section -->
+        <div class="section fade-in">
+            <h2>What is Blockchain?</h2>
+            <p style="font-size: 1.2rem; line-height: 1.8; text-align: center; margin-bottom: 2rem;">
+                Blockchain is a distributed, immutable ledger technology that maintains a continuously growing list of records, called blocks, which are linked and secured using cryptography.
+            </p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="crypto-animation"></div>
+                    <h3>🔒 Immutable</h3>
+                    <p>Once data is recorded, it cannot be altered without network consensus</p>
+                </div>
+                <div class="feature-card">
+                    <div class="crypto-animation"></div>
+                    <h3>🌐 Decentralized</h3>
+                    <p>No single point of control or failure</p>
+                </div>
+                <div class="feature-card">
+                    <div class="crypto-animation"></div>
+                    <h3>🔍 Transparent</h3>
+                    <p>All transactions are visible to network participants</p>
+                </div>
+                <div class="feature-card">
+                    <div class="crypto-animation"></div>
+                    <h3>🛡️ Secure</h3>
+                    <p>Cryptographic hashing ensures data integrity</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- How Blockchain Works -->
+        <div class="section">
+            <h2>How Blockchain Works</h2>
+            <button class="interactive-button" onclick="animateBlockchain()">🎬 Animate Blockchain Creation</button>
+            
+            <div class="blockchain-demo" id="blockchainDemo">
+                <div class="block" style="background: linear-gradient(45deg, #e74c3c, #c0392b);">
+                    <div class="chain-link"></div>
+                    <div class="block-header">Genesis Block</div>
+                    <div class="block-content">
+                        <strong>Hash:</strong> 000abc...<br>
+                        <strong>Prev Hash:</strong> 0<br>
+                        <strong>Data:</strong> First block
+                    </div>
+                </div>
+                
+                <div class="block">
+                    <div class="chain-link"></div>
+                    <div class="block-header">Block #1</div>
+                    <div class="block-content">
+                        <strong>Hash:</strong> 001def...<br>
+                        <strong>Prev Hash:</strong> 000abc...<br>
+                        <strong>Data:</strong> Transaction A→B
+                    </div>
+                </div>
+                
+                <div class="block">
+                    <div class="chain-link"></div>
+                    <div class="block-header">Block #2</div>
+                    <div class="block-content">
+                        <strong>Hash:</strong> 002ghi...<br>
+                        <strong>Prev Hash:</strong> 001def...<br>
+                        <strong>Data:</strong> Transaction C→D
+                    </div>
+                </div>
+                
+                <div class="block" style="opacity: 0.5; border-style: dashed;">
+                    <div class="block-header">New Block</div>
+                    <div class="block-content">
+                        <strong>Hash:</strong> Mining...<br>
+                        <strong>Prev Hash:</strong> 002ghi...<br>
+                        <strong>Data:</strong> Pending...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Process -->
+        <div class="section">
+            <h2>Transaction Process</h2>
+            <button class="interactive-button" onclick="animateTransaction()">💰 Simulate Transaction</button>
+            
+            <div class="transaction-flow">
+                <div class="transaction-step">
+                    <h3>1. Initiate</h3>
+                    <p>User initiates a transaction</p>
+                </div>
+                <div class="transaction-step">
+                    <h3>2. Broadcast</h3>
+                    <p>Transaction is broadcast to the network</p>
+                </div>
+                <div class="transaction-step">
+                    <h3>3. Validate</h3>
+                    <p>Network nodes validate the transaction</p>
+                </div>
+                <div class="transaction-step">
+                    <h3>4. Mine</h3>
+                    <p>Miners compete to add block to chain</p>
+                </div>
+                <div class="transaction-step">
+                    <h3>5. Confirm</h3>
+                    <p>Transaction is confirmed and immutable</p>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="transactionProgress"></div>
+            </div>
+        </div>
+
+        <!-- Mining Process -->
+        <div class="section">
+            <h2>Mining & Consensus</h2>
+            <button class="interactive-button" onclick="startMining()">⛏️ Start Mining Simulation</button>
+            
+            <div class="mining-demo" id="miningDemo">
+                <div class="miner">⛏️</div>
+                <div class="miner">💻</div>
+                <div class="miner">🔧</div>
+                <div class="miner">⚡</div>
+            </div>
+            
+            <div class="consensus-demo">
+                <div class="consensus-mechanism">
+                    <h3>🔨 Proof of Work (PoW)</h3>
+                    <p>Miners compete to solve computational puzzles. First to solve gets to add the block and receive rewards.</p>
+                    <small>Used by: Bitcoin, Ethereum (legacy)</small>
+                </div>
+                
+                <div class="consensus-mechanism">
+                    <h3>🏦 Proof of Stake (PoS)</h3>
+                    <p>Validators are chosen based on their stake in the network. More energy efficient than PoW.</p>
+                    <small>Used by: Ethereum 2.0, Cardano</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Types of Blockchain -->
+        <div class="section">
+            <h2>Types of Blockchain Networks</h2>
+            
+            <div class="blockchain-types">
+                <div class="blockchain-type">
+                    <div class="type-icon">🌐</div>
+                    <h3>Public Blockchain</h3>
+                    <p><strong>Open to everyone</strong></p>
+                    <ul style="text-align: left; margin-top: 1rem;">
+                        <li>Fully decentralized</li>
+                        <li>Anyone can participate</li>
+                        <li>Transparent and immutable</li>
+                        <li>Examples: Bitcoin, Ethereum</li>
+                    </ul>
+                </div>
+                
+                <div class="blockchain-type">
+                    <div class="type-icon">🏢</div>
+                    <h3>Private Blockchain</h3>
+                    <p><strong>Restricted access</strong></p>
+                    <ul style="text-align: left; margin-top: 1rem;">
+                        <li>Controlled by organization</li>
+                        <li>Limited participants</li>
+                        <li>Faster transactions</li>
+                        <li>Examples: Hyperledger Fabric</li>
+                    </ul>
+                </div>
+                
+                <div class="blockchain-type">
+                    <div class="type-icon">🤝</div>
+                    <h3>Consortium Blockchain</h3>
+                    <p><strong>Semi-decentralized</strong></p>
+                    <ul style="text-align: left; margin-top: 1rem;">
+                        <li>Controlled by group</li>
+                        <li>Partially decentralized</li>
+                        <li>Shared control</li>
+                        <li>Examples: R3 Corda</li>
+                    </ul>
+                </div>
+                
+                <div class="blockchain-type">
+                    <div class="type-icon">🔗</div>
+                    <h3>Hybrid Blockchain</h3>
+                    <p><strong>Best of both worlds</strong></p>
+                    <ul style="text-align: left; margin-top: 1rem;">
+                        <li>Public + Private features</li>
+                        <li>Selective transparency</li>
+                        <li>Customizable access</li>
+                        <li>Examples: IBM Blockchain</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Demonstration -->
+        <div class="section">
+            <h2>Decentralized Network</h2>
+            <button class="interactive-button" onclick="simulateNetworkActivity()">🌐 Simulate Network Activity</button>
+            
+            <div class="network-demo" id="networkDemo">
+                <div class="node">Node 1</div>
+                <div class="node">Node 2</div>
+                <div class="node">Node 3</div>
+                <div class="node">Node 4</div>
+                <div class="node">Node 5</div>
+                <div class="node">Node 6</div>
+            </div>
+        </div>
+
+        <!-- Use Cases -->
+        <div class="section">
+            <h2>Real-World Applications</h2>
+            
+            <div class="use-cases">
+                <div class="use-case">
+                    <h3>💰 Cryptocurrency</h3>
+                    <p>Digital currencies like Bitcoin and Ethereum</p>
+                </div>
+                
+                <div class="use-case">
+                    <h3>📋 Supply Chain</h3>
+                    <p>Track products from origin to consumer</p>
+                </div>
+                
+                <div class="use-case">
+                    <h3>🏥 Healthcare</h3>
+                    <p>Secure patient data management</p>
+                </div>
+                
+                <div class="use-case">
+                    <h3>🗳️ Voting</h3>
+                    <p>Transparent and tamper-proof elections</p>
+                </div>
+                
+                <div class="use-case">
+                    <h3>🏠 Real Estate</h3>
+                    <p>Property ownership and transfer records</p>
+                </div>
+                
+                <div class="use-case">
+                    <h3>🎨 NFTs</h3>
+                    <p>Digital ownership of unique assets</p>
+                </div>
+                
+                <div class="use-case">
+                    <h3>💼 Smart Contracts</h3>
+                    <p>Self-executing contracts with code</p>
+                </div>
+                
+                <div class="use-case">
+                    <h3>🎓 Education</h3>
+                    <p>Credential verification and certificates</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Concepts -->
+        <div class="section">
+            <h2>Key Concepts Summary</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>🔑 Hash Functions</h3>
+                    <p>Mathematical functions that convert input data into fixed-size strings, ensuring data integrity</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>🔐 Digital Signatures</h3>
+                    <p>Cryptographic mechanisms that prove ownership and prevent unauthorized transactions</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>📊 Merkle Trees</h3>
+                    <p>Binary tree structures that efficiently summarize all transactions in a block</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>⚡ Smart Contracts</h3>
+                    <p>Self-executing contracts with terms directly written into code</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>🎯 Consensus Algorithms</h3>
+                    <p>Protocols that ensure all nodes agree on the blockchain state</p>
+                </div>
+                
+                <div class="feature-card">
+                    <h3>🔄 Distributed Ledger</h3>
+                    <p>Database spread across multiple locations and participants</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conclusion -->
+        <div class="section">
+            <h2>Conclusion</h2>
+            <p style="font-size: 1.2rem; line-height: 1.8; text-align: center;">
+                Blockchain technology represents a paradigm shift in how we think about trust, verification, and value exchange in digital systems. Its applications extend far beyond cryptocurrency, offering solutions for transparency, security, and decentralization across various industries.
+            </p>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="interactive-button" onclick="resetAllDemos()">🔄 Reset All Demonstrations</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function animateBlockchain() {
+            const blocks = document.querySelectorAll('.block');
+            blocks.forEach((block, index) => {
+                setTimeout(() => {
+                    block.style.transform = 'scale(1.1)';
+                    block.style.boxShadow = '0 0 20px rgba(255, 215, 0, 0.8)';
+                    setTimeout(() => {
+                        block.style.transform = 'scale(1)';
+                        block.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)';
+                    }, 300);
+                }, index * 500);
+            });
+        }
+
+        function animateTransaction() {
+            const progress = document.getElementById('transactionProgress');
+            const steps = document.querySelectorAll('.transaction-step');
+            
+            progress.style.width = '0%';
+            
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    step.style.background = 'rgba(255, 215, 0, 0.3)';
+                    step.style.transform = 'scale(1.05)';
+                    progress.style.width = ((index + 1) / steps.length * 100) + '%';
+                    
+                    setTimeout(() => {
+                        step.style.background = 'rgba(255,255,255,0.2)';
+                        step.style.transform = 'scale(1)';
+                    }, 800);
+                }, index * 1000);
+            });
+        }
+
+        function startMining() {
+            const miners = document.querySelectorAll('.miner');
+            miners.forEach((miner, index) => {
+                setTimeout(() => {
+                    miner.style.background = 'linear-gradient(45deg, #f39c12, #ffd700)';
+                    miner.style.animation = 'mining 0.5s infinite';
+                    
+                    setTimeout(() => {
+                        if (index === 1) { // Second miner wins
+                            miner.style.background = 'linear-gradient(45deg, #27ae60, #2ecc71)';
+                            miner.innerHTML = '🏆';
+                            miner.style.transform = 'scale(1.3)';
+                        } else {
+                            miner.style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
+                            miner.style.animation = 'mining 2s infinite';
+                        }
+                    }, 3000);
+                }, index * 200);
+            });
+        }
+
+        function simulateNetworkActivity() {
+            const nodes = document.querySelectorAll('.node');
+            nodes.forEach((node, index) => {
+                setTimeout(() => {
+                    node.style.background = 'linear-gradient(45deg, #ffd700, #f39c12)';
+                    node.style.color = '#000';
+                    node.style.transform = 'scale(1.2)';
+                    
+                    setTimeout(() => {
+                        node.style.background = 'linear-gradient(45deg, #27ae60, #2ecc71)';
+                        node.style.color = 'white';
+                        node.style.transform = 'scale(1)';
+                    }, 1000);
+                }, index * 300);
+            });
+        }
+
+        function resetAllDemos() {
+            // Reset blockchain animation
+            const blocks = document.querySelectorAll('.block');
+            blocks.forEach(block => {
+                block.style.transform = 'scale(1)';
+                block.style.boxShadow = '0 8px 32px rgba(0,0,0,0.3)';
+            });
+
+            // Reset transaction progress
+            const progress = document.getElementById('transactionProgress');
+            progress.style.width = '0%';
+            
+            const steps = document.querySelectorAll('.transaction-step');
+            steps.forEach(step => {
+                step.style.background = 'rgba(255,255,255,0.2)';
+                step.style.transform = 'scale(1)';
+            });
+
+            // Reset miners
+            const miners = document.querySelectorAll('.miner');
+            miners.forEach((miner, index) => {
+                miner.style.background = 'linear-gradient(45deg, #e74c3c, #c0392b)';
+                miner.innerHTML = '⛏️';
+                miner.style.transform = 'scale(1)';
+                miner.style.animation = 'mining 2s infinite';
+            });
+
+            // Reset network nodes
+            const nodes = document.querySelectorAll('.node');
+            nodes.forEach(node => {
+                node.style.background = 'linear-gradient(45deg, #27ae60, #2ecc71)';
+                node.style.color = 'white';
+                node.style.transform = 'scale(1)';
+            });
+        }
+
+        // Add click events to blocks for detailed information
+        document.querySelectorAll('.block').forEach((block, index) => {
+            block.addEventListener('click', () => {
+                alert(`Block ${index} Details:\n\nThis block contains transaction data, timestamp, and cryptographic hash linking it to the previous block. The hash ensures the integrity and immutability of the blockchain.`);
+            });
+        });
+
+        // Initialize animations on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const sections = document.querySelectorAll('.section');
+                sections.forEach((section, index) => {
+                    setTimeout(() => {
+                        section.classList.add('fade-in');
+                    }, index * 200);
+                });
+            }, 500);
+        });
+    </script>
+</body>
+</html>

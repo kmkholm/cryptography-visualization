@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Blockchain Technology Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            overflow-x: hidden;
+            font-size: 12px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            border-bottom: 2px solid #00ff00;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+        }
+
+        .author {
+            color: #ffff00;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            padding: 1rem;
+        }
+
+        .section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #1a1a1a, #0d1b2a);
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+        }
+
+        .section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #ffff00;
+            text-align: center;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Advanced Block Structure */
+        .blockchain-container {
+            display: flex;
+            overflow-x: auto;
+            padding: 2rem;
+            gap: 3rem;
+            background: #000;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+        }
+
+        .advanced-block {
+            min-width: 350px;
+            background: linear-gradient(145deg, #1e3c72, #2a5298);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 1rem;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        .advanced-block:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.6);
+        }
+
+        .block-header {
+            background: #000;
+            color: #ffff00;
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .block-data {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border: 1px solid #333;
+        }
+
+        .hash-display {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #00ff00;
+            padding: 0.5rem;
+            border-radius: 3px;
+            word-break: break-all;
+            margin: 0.5rem 0;
+            border: 1px solid #00ff00;
+        }
+
+        .merkle-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border: 1px solid #ffff00;
+        }
+
+        .merkle-level {
+            display: flex;
+            gap: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .merkle-node {
+            background: #2d2d2d;
+            color: #00ff00;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: 1px solid #00ff00;
+            font-size: 10px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .merkle-root {
+            background: #ff6600;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Transaction Pool */
+        .transaction-pool {
+            background: #1a1a1a;
+            border: 2px solid #ff6600;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .transaction {
+            background: #2d2d2d;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: txPending 2s infinite;
+        }
+
+        @keyframes txPending {
+            0%, 100% { border-color: #00ff00; }
+            50% { border-color: #ffff00; }
+        }
+
+        .tx-verified {
+            animation: none;
+            border-color: #00ff00;
+            background: #0d2818;
+        }
+
+        /* Mining Visualization */
+        .mining-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 1rem 0;
+        }
+
+        .mining-process {
+            background: #1a1a1a;
+            border: 2px solid #ff6600;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .hash-attempts {
+            background: #000;
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            margin: 1rem 0;
+            border: 1px solid #00ff00;
+        }
+
+        .difficulty-display {
+            background: #2d2d2d;
+            color: #ffff00;
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        /* Network Topology */
+        .network-topology {
+            position: relative;
+            height: 400px;
+            background: #000;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .network-node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #00ff00, #008000);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .network-node:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px #00ff00;
+        }
+
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, #00ff00, #008000);
+            transform-origin: left center;
+            opacity: 0.7;
+        }
+
+        .data-packet {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffff00;
+            border-radius: 50%;
+            animation: packetMove 3s linear infinite;
+        }
+
+        @keyframes packetMove {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.5); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Smart Contract Execution */
+        .smart-contract {
+            background: #1a1a1a;
+            border: 2px solid #9966ff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .contract-code {
+            background: #000;
+            color: #9966ff;
+            padding: 1rem;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            border: 1px solid #9966ff;
+            margin: 1rem 0;
+        }
+
+        .execution-stack {
+            background: #2d2d2d;
+            border: 1px solid #9966ff;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        /* Consensus Mechanism */
+        .consensus-viz {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .consensus-node {
+            background: #1a1a1a;
+            border: 2px solid #ff6600;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .validator-status {
+            background: #2d2d2d;
+            color: #00ff00;
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin: 0.5rem 0;
+        }
+
+        /* Real-time Data Display */
+        .data-monitor {
+            background: #000;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .data-stream {
+            color: #00ff00;
+            font-size: 10px;
+            line-height: 1.2;
+            height: 150px;
+            overflow-y: auto;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .control-btn {
+            background: linear-gradient(145deg, #2d2d2d, #1a1a1a);
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(145deg, #00ff00, #008000);
+            color: #000;
+            box-shadow: 0 0 15px #00ff00;
+        }
+
+        /* Cryptographic Details */
+        .crypto-details {
+            background: #1a1a1a;
+            border: 2px solid #ff6600;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .key-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .key-display {
+            background: #000;
+            color: #ff6600;
+            padding: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ff6600;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            word-break: break-all;
+        }
+
+        /* State Changes */
+        .state-machine {
+            background: #1a1a1a;
+            border: 2px solid #ffff00;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .state-transition {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #2d2d2d;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 5px;
+            border: 1px solid #ffff00;
+        }
+
+        .arrow {
+            color: #ffff00;
+            font-size: 1.5rem;
+        }
+
+        /* Performance Metrics */
+        .metrics-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .metric-card {
+            background: #1a1a1a;
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        .metric-label {
+            color: #00ff00;
+            margin-top: 0.5rem;
+        }
+
+        /* Loading Animations */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #333;
+            border-radius: 50%;
+            border-top-color: #00ff00;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .blockchain-container {
+                flex-direction: column;
+            }
+            
+            .advanced-block {
+                min-width: 100%;
+            }
+            
+            .mining-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .key-pair {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⛓️ Advanced Blockchain Technology Visualization</h1>
+        <div class="subtitle">Deep Technical Analysis & Real-time Simulation</div>
+        <div class="author"> Dr. Mohammed Tawfik   kmkhol01@gmail.com</div>
+    </div>
+
+    <div class="container">
+        <!-- Control Panel -->
+        <div class="section">
+            <h2>🎛️ Blockchain Simulation Control Panel</h2>
+            <div class="control-panel">
+                <button class="control-btn" onclick="startBlockchainSim()">🚀 Start Blockchain</button>
+                <button class="control-btn" onclick="createTransaction()">💸 Create Transaction</button>
+                <button class="control-btn" onclick="startMining()">⛏️ Start Mining</button>
+                <button class="control-btn" onclick="executeContract()">📜 Execute Contract</button>
+                <button class="control-btn" onclick="simulateConsensus()">🤝 Consensus Test</button>
+                <button class="control-btn" onclick="generateKeys()">🔑 Generate Keys</button>
+            </div>
+        </div>
+
+        <!-- Real-time Metrics -->
+        <div class="section">
+            <h2>📊 Real-time Blockchain Metrics</h2>
+            <div class="metrics-dashboard">
+                <div class="metric-card">
+                    <div class="metric-value" id="blockHeight">0</div>
+                    <div class="metric-label">Block Height</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="hashRate">0</div>
+                    <div class="metric-label">Hash Rate (H/s)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="difficulty">1</div>
+                    <div class="metric-label">Difficulty</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="txPool">0</div>
+                    <div class="metric-label">TX Pool Size</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="networkNodes">0</div>
+                    <div class="metric-label">Network Nodes</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="blockTime">0</div>
+                    <div class="metric-label">Avg Block Time (s)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Block Structure -->
+        <div class="section">
+            <h2>🧱 Advanced Block Structure & Chain Linking</h2>
+            <div class="blockchain-container" id="blockchainContainer">
+                <!-- Blocks will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Transaction Pool -->
+        <div class="section">
+            <h2>💳 Transaction Pool & Mempool</h2>
+            <div class="transaction-pool" id="transactionPool">
+                <h3 style="color: #ffff00; margin-bottom: 1rem;">Pending Transactions</h3>
+                <div id="pendingTxs"></div>
+            </div>
+        </div>
+
+        <!-- Mining Process -->
+        <div class="section">
+            <h2>⛏️ Mining Process & Proof of Work</h2>
+            <div class="mining-container">
+                <div class="mining-process">
+                    <h3 style="color: #ff6600; margin-bottom: 1rem;">Hash Generation Attempts</h3>
+                    <div class="hash-attempts" id="hashAttempts"></div>
+                    <div class="difficulty-display" id="difficultyDisplay">
+                        Difficulty: <span id="currentDifficulty">4</span> leading zeros required
+                    </div>
+                </div>
+                <div class="mining-process">
+                    <h3 style="color: #ff6600; margin-bottom: 1rem;">Nonce Testing</h3>
+                    <div class="hash-attempts" id="nonceAttempts"></div>
+                    <div class="difficulty-display">
+                        Current Nonce: <span id="currentNonce">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Topology -->
+        <div class="section">
+            <h2>🌐 Network Topology & Consensus</h2>
+            <div class="network-topology" id="networkTopology">
+                <!-- Network nodes and connections will be dynamically generated -->
+            </div>
+            <div class="consensus-viz" id="consensusViz">
+                <!-- Consensus visualization -->
+            </div>
+        </div>
+
+        <!-- Merkle Tree Visualization -->
+        <div class="section">
+            <h2>🌳 Merkle Tree Structure</h2>
+            <div class="merkle-tree" id="merkleTree">
+                <!-- Merkle tree will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Smart Contract Execution -->
+        <div class="section">
+            <h2>📜 Smart Contract Execution</h2>
+            <div class="smart-contract">
+                <h3 style="color: #9966ff; margin-bottom: 1rem;">Smart Contract Code</h3>
+                <div class="contract-code" id="contractCode">
+pragma solidity ^0.8.0;
+
+contract SimpleBank {
+    mapping(address => uint256) private balances;
+    
+    function deposit() public payable {
+        balances[msg.sender] += msg.value;
+        emit Deposit(msg.sender, msg.value);
+    }
+    
+    function withdraw(uint256 amount) public {
+        require(balances[msg.sender] >= amount, "Insufficient balance");
+        balances[msg.sender] -= amount;
+        payable(msg.sender).transfer(amount);
+        emit Withdrawal(msg.sender, amount);
+    }
+    
+    function getBalance() public view returns (uint256) {
+        return balances[msg.sender];
+    }
+}
+                </div>
+                <div class="execution-stack" id="executionStack">
+                    <h4 style="color: #9966ff;">Execution Stack</h4>
+                    <div id="stackTrace"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cryptographic Details -->
+        <div class="section">
+            <h2>🔐 Cryptographic Key Management</h2>
+            <div class="crypto-details">
+                <div class="key-pair">
+                    <div>
+                        <h4 style="color: #ff6600; margin-bottom: 0.5rem;">Private Key</h4>
+                        <div class="key-display" id="privateKey">Click 'Generate Keys' to create key pair</div>
+                    </div>
+                    <div>
+                        <h4 style="color: #ff6600; margin-bottom: 0.5rem;">Public Key</h4>
+                        <div class="key-display" id="publicKey">Click 'Generate Keys' to create key pair</div>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: #ff6600; margin-bottom: 0.5rem;">Wallet Address</h4>
+                    <div class="key-display" id="walletAddress">Click 'Generate Keys' to create address</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- State Machine -->
+        <div class="section">
+            <h2>🔄 Blockchain State Transitions</h2>
+            <div class="state-machine" id="stateMachine">
+                <!-- State transitions will be shown here -->
+            </div>
+        </div>
+
+        <!-- Real-time Data Monitor -->
+        <div class="section">
+            <h2>📺 Real-time System Monitor</h2>
+            <div class="data-monitor">
+                <h3 style="color: #00ff00; margin-bottom: 1rem;">System Log</h3>
+                <div class="data-stream" id="dataStream">
+                    [SYSTEM] Blockchain visualization initialized<br>
+                    [INFO] Waiting for user interaction...<br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Blockchain simulation state
+        let blockchain = [];
+        let transactionPool = [];
+        let networkNodes = [];
+        let isMining = false;
+        let blockHeight = 0;
+        let difficulty = 4;
+        let currentNonce = 0;
+        let hashRate = 0;
+
+        // Initialize blockchain with genesis block
+        function initializeBlockchain() {
+            const genesisBlock = {
+                index: 0,
+                timestamp: Date.now(),
+                data: "Genesis Block",
+                previousHash: "0",
+                hash: "000abcd1234567890123456789012345678901234567890123456789abcdef",
+                nonce: 0,
+                merkleRoot: "abcd1234567890123456789012345678901234567890123456789abcdef",
+                transactions: []
+            };
+            blockchain.push(genesisBlock);
+            updateMetrics();
+            renderBlockchain();
+            logMessage("[BLOCKCHAIN] Genesis block created");
+        }
+
+        // Advanced hash function simulation (simplified SHA-256)
+        function calculateHash(data) {
+            let hash = 0;
+            const str = JSON.stringify(data);
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            return Math.abs(hash).toString(16).padStart(64, '0');
+        }
+
+        // Generate cryptographic keys
+        function generateKeys() {
+            const privateKey = Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+            const publicKey = Array.from({length: 128}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+            const address = '0x' + Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+            
+            document.getElementById('privateKey').textContent = privateKey;
+            document.getElementById('publicKey').textContent = publicKey;
+            document.getElementById('walletAddress').textContent = address;
+            
+            logMessage("[CRYPTO] New key pair generated");
+            logMessage(`[CRYPTO] Address: ${address}`);
+        }
+
+        // Create new transaction
+        function createTransaction() {
+            const fromAddress = '0x' + Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+            const toAddress = '0x' + Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+            const amount = (Math.random() * 10).toFixed(4);
+            const fee = (Math.random() * 0.01).toFixed(6);
+            
+            const transaction = {
+                id: calculateHash(Date.now() + Math.random()),
+                from: fromAddress,
+                to: toAddress,
+                amount: amount,
+                fee: fee,
+                timestamp: Date.now(),
+                signature: Array.from({length: 128}, () => Math.floor(Math.random() * 16).toString(16)).join('')
+            };
+            
+            transactionPool.push(transaction);
+            updateTransactionPool();
+            updateMetrics();
+            
+            logMessage(`[TX] New transaction: ${amount} ETH from ${fromAddress.substring(0, 10)}... to ${toAddress.substring(0, 10)}...`);
+        }
+
+        // Update transaction pool display
+        function updateTransactionPool() {
+            const poolElement = document.getElementById('pendingTxs');
+            poolElement.innerHTML = '';
+            
+            transactionPool.forEach((tx, index) => {
+                const txElement = document.createElement('div');
+                txElement.className = 'transaction';
+                txElement.innerHTML = `
+                    <div>
+                        <strong>TX #${index + 1}</strong><br>
+                        From: ${tx.from.substring(0, 20)}...<br>
+                        To: ${tx.to.substring(0, 20)}...<br>
+                        Amount: ${tx.amount} ETH<br>
+                        Fee: ${tx.fee} ETH
+                    </div>
+                    <div>
+                        <div style="font-size: 10px; color: #ffff00;">
+                            Signature: ${tx.signature.substring(0, 20)}...
+                        </div>
+                    </div>
+                `;
+                poolElement.appendChild(txElement);
+            });
+        }
+
+        // Start mining process
+        async function startMining() {
+            if (isMining) return;
+            if (transactionPool.length === 0) {
+                createTransaction();
+                createTransaction();
+                createTransaction();
+            }
+            
+            isMining = true;
+            logMessage("[MINING] Starting mining process...");
+            
+            const hashAttemptsEl = document.getElementById('hashAttempts');
+            const nonceAttemptsEl = document.getElementById('nonceAttempts');
+            
+            let nonce = 0;
+            let targetPrefix = '0'.repeat(difficulty);
+            let found = false;
+            let attempts = 0;
+            
+            const blockData = {
+                index: blockchain.length,
+                timestamp: Date.now(),
+                transactions: [...transactionPool],
+                previousHash: blockchain[blockchain.length - 1].hash,
+                merkleRoot: calculateMerkleRoot(transactionPool)
+            };
+            
+            while (!found && attempts < 10000) {
+                nonce++;
+                attempts++;
+                currentNonce = nonce;
+                
+                const blockWithNonce = { ...blockData, nonce };
+                const hash = calculateHash(blockWithNonce);
+                
+                // Display hash attempt
+                hashAttemptsEl.innerHTML += `Attempt ${attempts}: ${hash}<br>`;
+                hashAttemptsEl.scrollTop = hashAttemptsEl.scrollHeight;
+                
+                nonceAttemptsEl.innerHTML += `Nonce ${nonce}: ${hash.startsWith(targetPrefix) ? '✅ FOUND!' : '❌ Invalid'}<br>`;
+                nonceAttemptsEl.scrollTop = nonceAttemptsEl.scrollHeight;
+                
+                document.getElementById('currentNonce').textContent = nonce;
+                
+                if (hash.startsWith(targetPrefix)) {
+                    found = true;
+                    const newBlock = { ...blockWithNonce, hash };
+                    blockchain.push(newBlock);
+                    transactionPool = [];
+                    blockHeight++;
+                    
+                    logMessage(`[MINING] Block mined! Hash: ${hash}`);
+                    logMessage(`[MINING] Nonce found: ${nonce} after ${attempts} attempts`);
+                    
+                    renderBlockchain();
+                    updateTransactionPool();
+                    updateMerkleTree();
+                    updateMetrics();
+                }
+                
+                // Add delay for visualization
+                if (attempts % 10 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+            
+            isMining = false;
+            if (!found) {
+                logMessage("[MINING] Mining stopped - max attempts reached");
+            }
+        }
+
+        // Calculate Merkle root
+        function calculateMerkleRoot(transactions) {
+            if (transactions.length === 0) return "0";
+            
+            let hashes = transactions.map(tx => calculateHash(tx));
+            
+            while (hashes.length > 1) {
+                let newLevel = [];
+                for (let i = 0; i < hashes.length; i += 2) {
+                    const left = hashes[i];
+                    const right = hashes[i + 1] || hashes[i];
+                    newLevel.push(calculateHash(left + right));
+                }
+                hashes = newLevel;
+            }
+            
+            return hashes[0];
+        }
+
+        // Update Merkle tree visualization
+        function updateMerkleTree() {
+            const merkleEl = document.getElementById('merkleTree');
+            if (transactionPool.length === 0) {
+                merkleEl.innerHTML = '<div style="color: #ffff00;">No transactions in pool</div>';
+                return;
+            }
+            
+            let hashes = transactionPool.map(tx => calculateHash(tx));
+            let levels = [hashes];
+            
+            while (hashes.length > 1) {
+                let newLevel = [];
+                for (let i = 0; i < hashes.length; i += 2) {
+                    const left = hashes[i];
+                    const right = hashes[i + 1] || hashes[i];
+                    newLevel.push(calculateHash(left + right));
+                }
+                hashes = newLevel;
+                levels.push([...hashes]);
+            }
+            
+            merkleEl.innerHTML = '';
+            levels.reverse().forEach((level, index) => {
+                const levelEl = document.createElement('div');
+                levelEl.className = 'merkle-level';
+                
+                level.forEach(hash => {
+                    const nodeEl = document.createElement('div');
+                    nodeEl.className = index === 0 ? 'merkle-node merkle-root' : 'merkle-node';
+                    nodeEl.textContent = hash.substring(0, 8) + '...';
+                    levelEl.appendChild(nodeEl);
+                });
+                
+                merkleEl.appendChild(levelEl);
+            });
+        }
+
+        // Render blockchain
+        function renderBlockchain() {
+            const container = document.getElementById('blockchainContainer');
+            container.innerHTML = '';
+            
+            blockchain.forEach((block, index) => {
+                const blockEl = document.createElement('div');
+                blockEl.className = 'advanced-block';
+                blockEl.innerHTML = `
+                    <div class="block-header">Block #${block.index}</div>
+                    <div class="block-data">
+                        <strong>Timestamp:</strong> ${new Date(block.timestamp).toLocaleString()}<br>
+                        <strong>Transactions:</strong> ${block.transactions ? block.transactions.length : 0}<br>
+                        <strong>Nonce:</strong> ${block.nonce}<br>
+                        <strong>Merkle Root:</strong> ${block.merkleRoot ? block.merkleRoot.substring(0, 16) + '...' : 'N/A'}
+                    </div>
+                    <div class="hash-display">
+                        <strong>Previous Hash:</strong><br>${block.previousHash}<br>
+                        <strong>Block Hash:</strong><br>${block.hash}
+                    </div>
+                `;
+                container.appendChild(blockEl);
+            });
+        }
+
+        // Execute smart contract
+        function executeContract() {
+            const stackEl = document.getElementById('stackTrace');
+            const operations = [
+                'PUSH1 0x60',
+                'PUSH1 0x40',
+                'MSTORE',
+                'CALLVALUE',
+                'DUP1',
+                'ISZERO',
+                'PUSH2 0x001f',
+                'JUMPI',
+                'PUSH1 0x00',
+                'DUP1',
+                'REVERT'
+            ];
+            
+            stackEl.innerHTML = '';
+            logMessage("[CONTRACT] Executing smart contract...");
+            
+            operations.forEach((op, index) => {
+                setTimeout(() => {
+                    stackEl.innerHTML += `<div style="color: #9966ff;">${index + 1}. ${op}</div>`;
+                    stackEl.scrollTop = stackEl.scrollHeight;
+                    
+                    if (index === operations.length - 1) {
+                        logMessage("[CONTRACT] Contract execution completed");
+                    }
+                }, index * 300);
+            });
+        }
+
+        // Simulate consensus
+        function simulateConsensus() {
+            const consensusEl = document.getElementById('consensusViz');
+            consensusEl.innerHTML = '';
+            
+            const nodes = ['Node A', 'Node B', 'Node C', 'Node D', 'Node E'];
+            
+            nodes.forEach(node => {
+                const nodeEl = document.createElement('div');
+                nodeEl.className = 'consensus-node';
+                nodeEl.innerHTML = `
+                    <h4>${node}</h4>
+                    <div class="validator-status">Status: Validating...</div>
+                    <div class="validator-status">Stake: ${(Math.random() * 1000).toFixed(0)} ETH</div>
+                    <div class="validator-status">Vote: <span class="loading"></span></div>
+                `;
+                consensusEl.appendChild(nodeEl);
+            });
+            
+            setTimeout(() => {
+                document.querySelectorAll('.consensus-node').forEach((node, index) => {
+                    const vote = Math.random() > 0.2 ? 'ACCEPT' : 'REJECT';
+                    const voteSpan = node.querySelector('.validator-status:last-child');
+                    voteSpan.innerHTML = `Vote: <span style="color: ${vote === 'ACCEPT' ? '#00ff00' : '#ff0000'}">${vote}</span>`;
+                });
+                logMessage("[CONSENSUS] Consensus round completed");
+            }, 3000);
+            
+            logMessage("[CONSENSUS] Starting consensus round...");
+        }
+
+        // Update metrics
+        function updateMetrics() {
+            document.getElementById('blockHeight').textContent = blockchain.length;
+            document.getElementById('txPool').textContent = transactionPool.length;
+            document.getElementById('difficulty').textContent = difficulty;
+            document.getElementById('hashRate').textContent = Math.floor(Math.random() * 1000000);
+            document.getElementById('networkNodes').textContent = networkNodes.length || 5;
+            document.getElementById('blockTime').textContent = (Math.random() * 20 + 10).toFixed(1);
+        }
+
+        // Initialize network topology
+        function initializeNetwork() {
+            const topology = document.getElementById('networkTopology');
+            const nodeCount = 8;
+            
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.className = 'network-node';
+                node.textContent = `N${i + 1}`;
+                node.style.left = `${Math.random() * 80 + 10}%`;
+                node.style.top = `${Math.random() * 70 + 15}%`;
+                topology.appendChild(node);
+                networkNodes.push(node);
+            }
+            
+            // Create connections
+            for (let i = 0; i < nodeCount - 1; i++) {
+                const line = document.createElement('div');
+                line.className = 'connection-line';
+                // Simplified line positioning
+                line.style.left = `${Math.random() * 80 + 10}%`;
+                line.style.top = `${Math.random() * 70 + 15}%`;
+                line.style.width = `${Math.random() * 100 + 50}px`;
+                line.style.transform = `rotate(${Math.random() * 360}deg)`;
+                topology.appendChild(line);
+            }
+        }
+
+        // Log messages
+        function logMessage(message) {
+            const dataStream = document.getElementById('dataStream');
+            const timestamp = new Date().toLocaleTimeString();
+            dataStream.innerHTML += `[${timestamp}] ${message}<br>`;
+            dataStream.scrollTop = dataStream.scrollHeight;
+        }
+
+        // Start blockchain simulation
+        function startBlockchainSim() {
+            logMessage("[SYSTEM] Initializing blockchain simulation...");
+            initializeBlockchain();
+            initializeNetwork();
+            updateMerkleTree();
+            logMessage("[SYSTEM] Blockchain simulation ready");
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            logMessage("[SYSTEM] Advanced Blockchain Visualization loaded");
+            logMessage("[SYSTEM] Click 'Start Blockchain' to begin simulation");
+            updateMetrics();
+        });
+
+        // Auto-update metrics
+        setInterval(updateMetrics, 2000);
+    </script>
+</body>
+</html>

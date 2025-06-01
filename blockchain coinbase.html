@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Blockchain Technical Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f0f4f8;
+            color: #333;
+            overflow-x: auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .author-credit {
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            opacity: 0.9;
+        }
+
+        .main-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            margin: 2rem 0;
+            padding: 2rem;
+            border: 1px solid #e1e8ed;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #3498db;
+        }
+
+        /* Peer Network Visualization */
+        .peer-network {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .peer-container {
+            background: #f8fffe;
+            border: 2px solid #27ae60;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .peer-header {
+            background: #27ae60;
+            color: white;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        /* Detailed Block Structure */
+        .blockchain-view {
+            display: flex;
+            overflow-x: auto;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: #ecf0f1;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .detailed-block {
+            min-width: 400px;
+            background: #d5f4e6;
+            border: 2px solid #27ae60;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .block-number {
+            background: #2c3e50;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .block-field {
+            margin: 1rem 0;
+        }
+
+        .field-label {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            background: white;
+        }
+
+        .hash-field {
+            background: #2c3e50;
+            color: #ecf0f1;
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            word-break: break-all;
+            padding: 0.8rem;
+            border-radius: 6px;
+            margin: 0.5rem 0;
+        }
+
+        .mine-button {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .mine-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .mine-button:active {
+            transform: translateY(0);
+        }
+
+        .mining {
+            animation: mining-pulse 1s infinite;
+        }
+
+        @keyframes mining-pulse {
+            0%, 100% { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+            50% { background: linear-gradient(45deg, #f39c12, #e67e22); }
+        }
+
+        /* Transaction Details */
+        .transaction-section {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .transaction-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .tx-amount {
+            background: #e8f5e8;
+            color: #155724;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .tx-address {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #6c757d;
+            background: #f8f9fa;
+            padding: 0.4rem;
+            border-radius: 4px;
+        }
+
+        .tx-arrow {
+            color: #007bff;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        /* Coinbase Transaction */
+        .coinbase-section {
+            background: #fffbf0;
+            border: 2px solid #ff9800;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .coinbase-reward {
+            background: #ff9800;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        /* Mining Progress */
+        .mining-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Network Difficulty */
+        .difficulty-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .difficulty-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Hash Attempts */
+        .hash-attempts {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            height: 200px;
+            overflow-y: auto;
+            margin: 1rem 0;
+        }
+
+        /* Block Chain Connection */
+        .chain-connector {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin: 0 1rem;
+        }
+
+        .chain-link {
+            width: 60px;
+            height: 8px;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .chain-link::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: -6px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #27ae60;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: #34495e;
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .control-section {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+
+        .control-button {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .control-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+        }
+
+        /* Wallet Address Display */
+        .wallet-section {
+            background: #e8f4fd;
+            border: 2px solid #007bff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .address-display {
+            background: #007bff;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            text-align: center;
+            margin: 0.5rem 0;
+        }
+
+        /* Animation for successful mining */
+        .block-mined {
+            animation: blockMined 2s ease-in-out;
+        }
+
+        @keyframes blockMined {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); box-shadow: 0 0 30px #27ae60; }
+            100% { transform: scale(1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .blockchain-view {
+                flex-direction: column;
+            }
+            
+            .detailed-block {
+                min-width: 100%;
+            }
+            
+            .peer-network {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading States */
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔗 Advanced Blockchain Technical Visualization</h1>
+        <div style="font-size: 1.2rem; margin-top: 0.5rem;">Interactive Blockchain Network Simulation</div>
+        <div class="author-credit">Dr. Mohammed Tawfik</div>
+    </div>
+
+    <div class="main-container">
+        <!-- Control Panel -->
+        <div class="section">
+            <h2 class="section-title">🎛️ Blockchain Network Control Center</h2>
+            <div class="control-panel">
+                <div class="control-grid">
+                    <div class="control-section">
+                        <h3>Network Operations</h3>
+                        <button class="control-button" onclick="initializeNetwork()">🌐 Initialize Network</button>
+                        <button class="control-button" onclick="addNewPeer()">➕ Add Peer</button>
+                        <button class="control-button" onclick="synchronizeNetwork()">🔄 Sync Network</button>
+                    </div>
+                    <div class="control-section">
+                        <h3>Transaction Management</h3>
+                        <button class="control-button" onclick="createRandomTransaction()">💸 Create Transaction</button>
+                        <button class="control-button" onclick="createCoinbaseTransaction()">🏦 Coinbase TX</button>
+                        <button class="control-button" onclick="clearTransactionPool()">🗑️ Clear Pool</button>
+                    </div>
+                    <div class="control-section">
+                        <h3>Mining Operations</h3>
+                        <button class="control-button" onclick="startMiningProcess()">⛏️ Start Mining</button>
+                        <button class="control-button" onclick="adjustDifficulty()">📊 Adjust Difficulty</button>
+                        <button class="control-button" onclick="showMiningStats()">📈 Mining Stats</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Network Statistics -->
+        <div class="section">
+            <h2 class="section-title">📊 Network Statistics & Metrics</h2>
+            <div class="mining-stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalBlocks">0</div>
+                    <div class="stat-label">Total Blocks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="pendingTx">0</div>
+                    <div class="stat-label">Pending Transactions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="hashRate">0 H/s</div>
+                    <div class="stat-label">Network Hash Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="activePeers">0</div>
+                    <div class="stat-label">Active Peers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="blockTime">0s</div>
+                    <div class="stat-label">Avg Block Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="networkDifficulty">1</div>
+                    <div class="stat-label">Network Difficulty</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Peer Network Visualization -->
+        <div class="section">
+            <h2 class="section-title">🌐 Peer-to-Peer Network</h2>
+            <div class="peer-network" id="peerNetwork">
+                <!-- Peers will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Blockchain Visualization -->
+        <div class="section">
+            <h2 class="section-title">⛓️ Blockchain Structure</h2>
+            <div class="blockchain-view" id="blockchainView">
+                <!-- Blocks will be dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Mining Process -->
+        <div class="section">
+            <h2 class="section-title">⛏️ Mining Process Monitor</h2>
+            <div class="difficulty-display">
+                <div class="difficulty-value" id="currentDifficulty">4</div>
+                <div>Leading Zeros Required (Difficulty Target)</div>
+            </div>
+            <div class="hash-attempts" id="miningAttempts">
+                [MINING] Waiting for mining process to start...<br>
+                [SYSTEM] Click 'Start Mining' to begin proof-of-work<br>
+            </div>
+        </div>
+
+        <!-- Transaction Pool -->
+        <div class="section">
+            <h2 class="section-title">💳 Transaction Mempool</h2>
+            <div class="transaction-section">
+                <h3>Pending Transactions</h3>
+                <div class="transaction-list" id="transactionPool">
+                    <div style="text-align: center; color: #6c757d; padding: 2rem;">
+                        No pending transactions. Click 'Create Transaction' to add some.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet & Address Management -->
+        <div class="section">
+            <h2 class="section-title">👛 Wallet & Address Management</h2>
+            <div class="wallet-section">
+                <h3>Generated Addresses</h3>
+                <div id="walletAddresses">
+                    <div style="text-align: center; color: #6c757d; padding: 1rem;">
+                        Click 'Initialize Network' to generate addresses
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Blockchain Network State
+        let blockchain = [];
+        let transactionPool = [];
+        let peers = [];
+        let miningInProgress = false;
+        let difficulty = 4;
+        let hashAttempts = 0;
+        let totalHashRate = 0;
+
+        // Predefined names for realistic transactions
+        const names = ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry', 'Iris', 'Jack', 'Kate', 'Liam', 'Mia', 'Noah', 'Olivia', 'Paul', 'Quinn', 'Rachel', 'Sam', 'Tara'];
+
+        // Utility Functions
+        function generateHash(data) {
+            let hash = 0;
+            const str = JSON.stringify(data);
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(16).padStart(64, '0');
+        }
+
+        function generateAddress() {
+            return '0x' + Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+        }
+
+        function generatePrivateKey() {
+            return Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+        }
+
+        function randomName() {
+            return names[Math.floor(Math.random() * names.length)];
+        }
+
+        function logMining(message) {
+            const attemptsEl = document.getElementById('miningAttempts');
+            const timestamp = new Date().toLocaleTimeString();
+            attemptsEl.innerHTML += `[${timestamp}] ${message}<br>`;
+            attemptsEl.scrollTop = attemptsEl.scrollHeight;
+        }
+
+        // Initialize Network
+        function initializeNetwork() {
+            // Create genesis block
+            const genesisBlock = {
+                blockNumber: 0,
+                nonce: 0,
+                timestamp: Date.now(),
+                previousHash: '0000000000000000000000000000000000000000000000000000000000000000',
+                merkleRoot: '4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b',
+                transactions: [],
+                coinbase: {
+                    to: generateAddress(),
+                    amount: 50.00,
+                    miner: 'Genesis Miner'
+                }
+            };
+            genesisBlock.hash = generateHash(genesisBlock);
+
+            blockchain = [genesisBlock];
+            
+            // Initialize 3 peers
+            peers = [];
+            for (let i = 0; i < 3; i++) {
+                createPeer(`Peer ${String.fromCharCode(65 + i)}`);
+            }
+
+            updateDisplay();
+            logMining('[NETWORK] Blockchain network initialized with genesis block');
+            logMining(`[NETWORK] ${peers.length} peers connected to network`);
+        }
+
+        // Create Peer
+        function createPeer(peerName) {
+            const peer = {
+                name: peerName,
+                address: generateAddress(),
+                privateKey: generatePrivateKey(),
+                blockchain: [...blockchain],
+                balance: Math.random() * 1000,
+                isOnline: true
+            };
+            peers.push(peer);
+            renderPeerNetwork();
+            return peer;
+        }
+
+        // Add New Peer
+        function addNewPeer() {
+            const peerLetter = String.fromCharCode(65 + peers.length);
+            createPeer(`Peer ${peerLetter}`);
+            updateStats();
+            logMining(`[NETWORK] New peer added: Peer ${peerLetter}`);
+        }
+
+        // Create Random Transaction
+        function createRandomTransaction() {
+            const fromName = randomName();
+            const toName = randomName();
+            const amount = (Math.random() * 10 + 0.1).toFixed(4);
+            const fee = (Math.random() * 0.01 + 0.001).toFixed(6);
+
+            const transaction = {
+                id: generateHash(Date.now() + Math.random()),
+                from: fromName,
+                fromAddress: generateAddress(),
+                to: toName,
+                toAddress: generateAddress(),
+                amount: parseFloat(amount),
+                fee: parseFloat(fee),
+                timestamp: Date.now(),
+                signature: generateHash(Math.random())
+            };
+
+            transactionPool.push(transaction);
+            renderTransactionPool();
+            updateStats();
+            logMining(`[TX] New transaction: ${amount} ETH from ${fromName} to ${toName}`);
+        }
+
+        // Create Coinbase Transaction
+        function createCoinbaseTransaction() {
+            const minerName = randomName();
+            const reward = 6.25; // Bitcoin-style block reward
+
+            const coinbaseTransaction = {
+                id: generateHash(Date.now() + Math.random()),
+                from: 'Coinbase',
+                fromAddress: '0000000000000000000000000000000000000000',
+                to: minerName,
+                toAddress: generateAddress(),
+                amount: reward,
+                fee: 0,
+                timestamp: Date.now(),
+                type: 'coinbase',
+                signature: generateHash('coinbase' + Math.random())
+            };
+
+            transactionPool.push(coinbaseTransaction);
+            renderTransactionPool();
+            updateStats();
+            logMining(`[COINBASE] Mining reward: ${reward} ETH to ${minerName}`);
+        }
+
+        // Start Mining Process
+        async function startMiningProcess() {
+            if (miningInProgress) {
+                logMining('[MINING] Mining already in progress...');
+                return;
+            }
+
+            if (transactionPool.length === 0) {
+                createRandomTransaction();
+                createRandomTransaction();
+                createCoinbaseTransaction();
+            }
+
+            miningInProgress = true;
+            const targetPrefix = '0'.repeat(difficulty);
+            let nonce = 0;
+            let found = false;
+            hashAttempts = 0;
+
+            logMining(`[MINING] Starting mining process (Difficulty: ${difficulty})`);
+            logMining(`[MINING] Target: ${targetPrefix}...`);
+
+            const newBlock = {
+                blockNumber: blockchain.length,
+                timestamp: Date.now(),
+                previousHash: blockchain[blockchain.length - 1].hash,
+                transactions: [...transactionPool],
+                merkleRoot: generateHash(transactionPool)
+            };
+
+            // Update mining button states
+            document.querySelectorAll('.mine-button').forEach(btn => {
+                btn.classList.add('mining');
+                btn.textContent = 'Mining...';
+                btn.disabled = true;
+            });
+
+            while (!found && hashAttempts < 1000000) {
+                nonce++;
+                hashAttempts++;
+                
+                const blockWithNonce = { ...newBlock, nonce };
+                const hash = generateHash(blockWithNonce);
+
+                if (hashAttempts % 1000 === 0) {
+                    logMining(`[MINING] Attempt ${hashAttempts}: ${hash}`);
+                    totalHashRate = hashAttempts / ((Date.now() - newBlock.timestamp) / 1000);
+                    updateStats();
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+
+                if (hash.startsWith(targetPrefix)) {
+                    found = true;
+                    newBlock.nonce = nonce;
+                    newBlock.hash = hash;
+                    
+                    blockchain.push(newBlock);
+                    transactionPool = [];
+
+                    logMining(`[MINING] ✅ BLOCK MINED! Hash: ${hash}`);
+                    logMining(`[MINING] Nonce: ${nonce} (${hashAttempts} attempts)`);
+                    logMining(`[MINING] Block ${newBlock.blockNumber} added to blockchain`);
+
+                    // Distribute to all peers
+                    peers.forEach(peer => {
+                        peer.blockchain = [...blockchain];
+                    });
+
+                    updateDisplay();
+                    
+                    // Animate successful mining
+                    setTimeout(() => {
+                        document.querySelector(`[data-block="${newBlock.blockNumber}"]`)?.classList.add('block-mined');
+                    }, 100);
+                }
+            }
+
+            // Reset mining button states
+            document.querySelectorAll('.mine-button').forEach(btn => {
+                btn.classList.remove('mining');
+                btn.textContent = 'Mine';
+                btn.disabled = false;
+            });
+
+            miningInProgress = false;
+
+            if (!found) {
+                logMining('[MINING] ❌ Mining failed - max attempts reached');
+            }
+        }
+
+        // Render Blockchain
+        function renderBlockchain() {
+            const container = document.getElementById('blockchainView');
+            container.innerHTML = '';
+
+            blockchain.forEach((block, index) => {
+                // Add chain connector (except for first block)
+                if (index > 0) {
+                    const connector = document.createElement('div');
+                    connector.className = 'chain-connector';
+                    connector.innerHTML = '<div class="chain-link"></div>';
+                    container.appendChild(connector);
+                }
+
+                const blockEl = document.createElement('div');
+                blockEl.className = 'detailed-block';
+                blockEl.setAttribute('data-block', block.blockNumber);
+
+                blockEl.innerHTML = `
+                    <div class="block-number">Block: #${block.blockNumber}</div>
+                    
+                    <div class="block-field">
+                        <div class="field-label">Nonce:</div>
+                        <input type="text" class="field-input" value="${block.nonce || 0}" readonly>
+                    </div>
+
+                    ${block.coinbase ? `
+                    <div class="coinbase-section">
+                        <div class="field-label">Coinbase:</div>
+                        <div class="coinbase-reward">$ ${block.coinbase.amount.toFixed(2)} → ${block.coinbase.miner || block.coinbase.to}</div>
+                    </div>
+                    ` : ''}
+
+                    <div class="transaction-section">
+                        <div class="field-label">Transactions (${block.transactions.length}):</div>
+                        <div class="transaction-list">
+                            ${block.transactions.slice(0, 3).map(tx => `
+                                <div class="transaction-item">
+                                    <div>
+                                        <div class="tx-address">${tx.from}</div>
+                                        <div class="tx-address">${tx.fromAddress.substring(0, 20)}...</div>
+                                    </div>
+                                    <div>
+                                        <div class="tx-arrow">→</div>
+                                        <div class="tx-amount">$ ${tx.amount.toFixed(2)}</div>
+                                    </div>
+                                    <div>
+                                        <div class="tx-address">${tx.to}</div>
+                                        <div class="tx-address">${tx.toAddress.substring(0, 20)}...</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${block.transactions.length > 3 ? `<div style="text-align: center; color: #6c757d;">... and ${block.transactions.length - 3} more</div>` : ''}
+                        </div>
+                    </div>
+
+                    <div class="block-field">
+                        <div class="field-label">Prev:</div>
+                        <div class="hash-field">${block.previousHash}</div>
+                    </div>
+
+                    <div class="block-field">
+                        <div class="field-label">Hash:</div>
+                        <div class="hash-field">${block.hash}</div>
+                    </div>
+
+                    <button class="mine-button" onclick="mineSpecificBlock(${index})" ${miningInProgress ? 'disabled' : ''}>
+                        ${miningInProgress ? 'Mining...' : 'Mine'}
+                    </button>
+                `;
+
+                container.appendChild(blockEl);
+            });
+        }
+
+        // Render Peer Network
+        function renderPeerNetwork() {
+            const container = document.getElementById('peerNetwork');
+            container.innerHTML = '';
+
+            peers.forEach(peer => {
+                const peerEl = document.createElement('div');
+                peerEl.className = 'peer-container';
+
+                const latestBlocks = peer.blockchain.slice(-3);
+
+                peerEl.innerHTML = `
+                    <div class="peer-header">${peer.name}</div>
+                    
+                    <div class="wallet-section">
+                        <div class="field-label">Wallet Address:</div>
+                        <div class="address-display">${peer.address}</div>
+                        <div style="text-align: center; margin-top: 0.5rem;">
+                            <strong>Balance: ${peer.balance.toFixed(4)} ETH</strong>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1rem;">
+                        <div class="field-label">Latest Blocks (${peer.blockchain.length} total):</div>
+                        ${latestBlocks.map(block => `
+                            <div style="background: #f8f9fa; padding: 0.8rem; margin: 0.5rem 0; border-radius: 6px; border-left: 4px solid #28a745;">
+                                <strong>Block #${block.blockNumber}</strong> | Nonce: ${block.nonce || 0}<br>
+                                <small>${block.hash ? block.hash.substring(0, 32) + '...' : 'Pending...'}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                container.appendChild(peerEl);
+            });
+        }
+
+        // Render Transaction Pool
+        function renderTransactionPool() {
+            const container = document.getElementById('transactionPool');
+            
+            if (transactionPool.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #6c757d; padding: 2rem;">
+                        No pending transactions. Click 'Create Transaction' to add some.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            transactionPool.forEach((tx, index) => {
+                const txEl = document.createElement('div');
+                txEl.className = 'transaction-item';
+                txEl.style.background = tx.type === 'coinbase' ? '#fff3cd' : 'white';
+                txEl.style.border = tx.type === 'coinbase' ? '2px solid #ffc107' : '1px solid #dee2e6';
+
+                txEl.innerHTML = `
+                    <div>
+                        <div style="font-weight: bold; color: ${tx.type === 'coinbase' ? '#856404' : '#2c3e50'};">
+                            ${tx.type === 'coinbase' ? '🏦 Coinbase' : `👤 ${tx.from}`}
+                        </div>
+                        <div class="tx-address">${tx.fromAddress.substring(0, 25)}...</div>
+                        ${tx.fee > 0 ? `<small>Fee: ${tx.fee.toFixed(6)} ETH</small>` : ''}
+                    </div>
+                    <div>
+                        <div class="tx-arrow">→</div>
+                        <div class="tx-amount ${tx.type === 'coinbase' ? '' : ''}">
+                            ${tx.type === 'coinbase' ? '⛏️' : '$'} ${tx.amount.toFixed(4)}
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-weight: bold; color: #2c3e50;">👤 ${tx.to}</div>
+                        <div class="tx-address">${tx.toAddress.substring(0, 25)}...</div>
+                        <small>TX #${index + 1}</small>
+                    </div>
+                `;
+
+                container.appendChild(txEl);
+            });
+        }
+
+        // Update Statistics
+        function updateStats() {
+            document.getElementById('totalBlocks').textContent = blockchain.length;
+            document.getElementById('pendingTx').textContent = transactionPool.length;
+            document.getElementById('hashRate').textContent = `${Math.floor(totalHashRate)} H/s`;
+            document.getElementById('activePeers').textContent = peers.length;
+            document.getElementById('networkDifficulty').textContent = difficulty;
+            
+            const avgBlockTime = blockchain.length > 1 ? 
+                (blockchain[blockchain.length - 1].timestamp - blockchain[0].timestamp) / (blockchain.length - 1) / 1000 : 0;
+            document.getElementById('blockTime').textContent = `${avgBlockTime.toFixed(1)}s`;
+        }
+
+        // Update All Displays
+        function updateDisplay() {
+            renderBlockchain();
+            renderPeerNetwork();
+            renderTransactionPool();
+            updateStats();
+        }
+
+        // Additional Control Functions
+        function clearTransactionPool() {
+            transactionPool = [];
+            renderTransactionPool();
+            updateStats();
+            logMining('[POOL] Transaction pool cleared');
+        }
+
+        function adjustDifficulty() {
+            difficulty = difficulty >= 6 ? 2 : difficulty + 1;
+            document.getElementById('currentDifficulty').textContent = difficulty;
+            logMining(`[DIFFICULTY] Network difficulty adjusted to ${difficulty}`);
+        }
+
+        function synchronizeNetwork() {
+            peers.forEach(peer => {
+                peer.blockchain = [...blockchain];
+            });
+            renderPeerNetwork();
+            logMining('[SYNC] All peers synchronized with latest blockchain');
+        }
+
+        function showMiningStats() {
+            logMining(`[STATS] Total Blocks: ${blockchain.length}`);
+            logMining(`[STATS] Network Hash Rate: ${Math.floor(totalHashRate)} H/s`);
+            logMining(`[STATS] Active Peers: ${peers.length}`);
+            logMining(`[STATS] Current Difficulty: ${difficulty}`);
+            logMining(`[STATS] Pending Transactions: ${transactionPool.length}`);
+        }
+
+        function mineSpecificBlock(blockIndex) {
+            startMiningProcess();
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            logMining('[SYSTEM] Advanced Blockchain Visualization loaded');
+            logMining('[SYSTEM] Click "Initialize Network" to begin');
+        });
+
+        // Auto-update stats every 3 seconds
+        setInterval(() => {
+            if (!miningInProgress) {
+                updateStats();
+            }
+        }, 3000);
+    </script>
+</body>
+</html>
