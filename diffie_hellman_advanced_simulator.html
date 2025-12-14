@@ -1,0 +1,2332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Diffie-Hellman Simulator - Dr. Mohammed Tawfik</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: backgroundScroll 20s linear infinite;
+        }
+
+        @keyframes backgroundScroll {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .subtitle {
+            font-size: 1.4em;
+            opacity: 0.95;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header .author {
+            font-size: 1.1em;
+            opacity: 0.85;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 25px;
+            padding: 35px;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .sidebar h2 {
+            color: #1e3c72;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            border-bottom: 4px solid #7e22ce;
+            padding-bottom: 12px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+            animation: slideInLeft 0.5s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #1e3c72;
+            font-weight: 700;
+            font-size: 1.05em;
+        }
+
+        .control-group input,
+        .control-group select {
+            width: 100%;
+            padding: 14px;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.05em;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .control-group input:focus,
+        .control-group select:focus {
+            outline: none;
+            border-color: #7e22ce;
+            box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.2);
+            transform: scale(1.02);
+        }
+
+        .control-group input:hover,
+        .control-group select:hover {
+            border-color: #2a5298;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.15em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.4);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(44, 62, 80, 0.6);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(17, 153, 142, 0.6);
+        }
+
+        .visualization-area {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            min-height: 800px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            border-bottom: 3px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 15px 28px;
+            background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            border-radius: 12px 12px 0 0;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.05em;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: transparent;
+            transition: background 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .tab.active::after {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .tab:hover:not(.active) {
+            background: linear-gradient(180deg, #e9ecef 0%, #dee2e6 100%);
+            transform: translateY(-1px);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .protocol-canvas {
+            width: 100%;
+            height: 600px;
+            border: 3px solid #e9ecef;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .step-indicator {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 10%;
+            width: 80%;
+            height: 4px;
+            background: linear-gradient(90deg, #e9ecef 0%, #dee2e6 100%);
+            z-index: 0;
+        }
+
+        .step {
+            text-align: center;
+            padding: 20px 15px;
+            background: white;
+            border-radius: 15px;
+            position: relative;
+            z-index: 1;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border: 3px solid #e9ecef;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .step::before {
+            content: attr(data-step);
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 35px;
+            height: 35px;
+            background: white;
+            border: 3px solid #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #6c757d;
+            transition: all 0.4s;
+        }
+
+        .step.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.08);
+            border-color: #667eea;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .step.active::before {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+            color: white;
+            transform: translateX(-50%) scale(1.2);
+        }
+
+        .step.completed {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border-color: #11998e;
+            box-shadow: 0 6px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .step.completed::before {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border-color: #11998e;
+            color: white;
+            content: '✓';
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(90deg, #e9ecef 0%, #f8f9fa 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 25px 0;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.1);
+            border: 2px solid #dee2e6;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            transition: width 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .particle-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #667eea, #764ba2);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.8);
+        }
+
+        .calculation-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-left: 5px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .calculation-box:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+            border: 2px solid #e9ecef;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+
+        .card h3 {
+            margin-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 12px;
+            font-size: 1.4em;
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .preset-btn {
+            padding: 12px;
+            background: white;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 700;
+            color: #667eea;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preset-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .preset-btn:hover::before {
+            left: 100%;
+        }
+
+        .preset-btn:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .value-display {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #667eea;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 30px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .timeline-event {
+            display: flex;
+            margin: 30px 0;
+            align-items: flex-start;
+            animation: slideInRight 0.6s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .timeline-marker {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            margin-right: 25px;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(102, 126, 234, 0.1);
+            }
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .timeline-content:hover {
+            transform: translateX(10px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 25px 0;
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: 700;
+            box-shadow: 0 10px 25px rgba(17, 153, 142, 0.4);
+            animation: bounceIn 0.8s ease-out;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .info-panel {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 8px 20px rgba(240, 147, 251, 0.4);
+        }
+
+        .math-display {
+            background: white;
+            color: #2c3e50;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+            line-height: 1.8;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+            margin: 25px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #000428 0%, #004e92 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .footer p {
+            margin: 8px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .step-indicator {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .speed-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .speed-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dee2e6;
+            transition: all 0.3s;
+        }
+
+        .speed-dot.active {
+            background: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.8);
+            transform: scale(1.3);
+        }
+
+        .key-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 25px;
+            margin: 8px;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+        }
+
+        .key-badge:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(102, 126, 234, 0.6);
+        }
+
+        .security-warning {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            color: #856404;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .attack-attempt {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin: 5px;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            animation: attemptPop 0.3s ease-out;
+        }
+
+        @keyframes attemptPop {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .encryption-byte {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #2c3e50;
+            color: #0f0;
+            margin: 2px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .decryption-success {
+            animation: successGlow 1s ease-in-out infinite;
+        }
+
+        @keyframes successGlow {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(39, 174, 96, 1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Advanced Diffie-Hellman Key Exchange Simulator</h1>
+            <div class="subtitle">Comprehensive Cryptographic Protocol Visualization & Analysis</div>
+            <div class="author">Created by Dr. Mohammed Tawfik</div>
+            <div class="author">Assistant Professor of Cybersecurity and Cloud Computing</div>
+            <div class="author">Ajloun National University, Jordan | kmkhol01@gmail.com</div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <h2>⚙️ Control Panel</h2>
+                
+                <div class="control-group">
+                    <label>📋 Preset Examples:</label>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" onclick="loadPreset('small')">Small<br>(p=23)</button>
+                        <button class="preset-btn" onclick="loadPreset('medium')">Medium<br>(p=97)</button>
+                        <button class="preset-btn" onclick="loadPreset('large')">Large<br>(p=353)</button>
+                        <button class="preset-btn" onclick="loadPreset('xlarge')">XLarge<br>(p=997)</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="prime">🔢 Prime Number (p):</label>
+                    <input type="number" id="prime" value="23" min="3">
+                    <small style="color: #6c757d; font-size: 0.9em;">Must be a prime number</small>
+                </div>
+
+                <div class="control-group">
+                    <label for="generator">⚡ Generator (g):</label>
+                    <input type="number" id="generator" value="5" min="2">
+                    <small style="color: #6c757d; font-size: 0.9em;">Primitive root modulo p</small>
+                </div>
+
+                <div class="control-group">
+                    <label for="alice-private">🔵 Alice's Private Key (a):</label>
+                    <input type="number" id="alice-private" value="6" min="2">
+                </div>
+
+                <div class="control-group">
+                    <label for="bob-private">🔴 Bob's Private Key (b):</label>
+                    <input type="number" id="bob-private" value="15" min="2">
+                </div>
+
+                <div class="control-group">
+                    <label for="speed">⏱️ Animation Speed:</label>
+                    <select id="speed" onchange="updateSpeedIndicator()">
+                        <option value="2000">Very Slow (2s)</option>
+                        <option value="1500">Slow (1.5s)</option>
+                        <option value="1000" selected>Normal (1s)</option>
+                        <option value="700">Fast (0.7s)</option>
+                        <option value="400">Very Fast (0.4s)</option>
+                    </select>
+                    <div class="speed-indicator">
+                        <span style="font-size: 0.9em;">Speed:</span>
+                        <div class="speed-dot" id="speed-1"></div>
+                        <div class="speed-dot" id="speed-2"></div>
+                        <div class="speed-dot active" id="speed-3"></div>
+                        <div class="speed-dot" id="speed-4"></div>
+                        <div class="speed-dot" id="speed-5"></div>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="startSimulation()">🚀 Start Simulation</button>
+                <button class="btn btn-secondary" onclick="resetSimulation()">🔄 Reset All</button>
+                <button class="btn btn-success" onclick="generateRandom()">🎲 Random Values</button>
+                
+                <div class="loading-spinner" id="loading"></div>
+            </div>
+
+            <div class="visualization-area">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('protocol')">📊 Protocol Flow</button>
+                    <button class="tab" onclick="switchTab('timeline')">⏱️ Timeline</button>
+                    <button class="tab" onclick="switchTab('calculations')">🔢 Calculations</button>
+                    <button class="tab" onclick="switchTab('security')">🔒 Security</button>
+                    <button class="tab" onclick="switchTab('attack')">⚔️ Attack Simulation</button>
+                    <button class="tab" onclick="switchTab('encryption')">🔐 Encryption Demo</button>
+                    <button class="tab" onclick="switchTab('analytics')">📈 Analytics</button>
+                </div>
+
+                <div id="protocol-tab" class="tab-content active">
+                    <h2 style="color: #1e3c72; margin-bottom: 25px;">Protocol Execution Visualization</h2>
+                    
+                    <div class="step-indicator" id="step-indicator">
+                        <div class="step" data-step="1">
+                            <strong>Setup</strong><br>
+                            <small>Initialize</small>
+                        </div>
+                        <div class="step" data-step="2">
+                            <strong>Alice</strong><br>
+                            <small>Generate</small>
+                        </div>
+                        <div class="step" data-step="3">
+                            <strong>Bob</strong><br>
+                            <small>Generate</small>
+                        </div>
+                        <div class="step" data-step="4">
+                            <strong>Exchange</strong><br>
+                            <small>Keys</small>
+                        </div>
+                        <div class="step" data-step="5">
+                            <strong>Complete</strong><br>
+                            <small>Secret</small>
+                        </div>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress" style="width: 0%">0%</div>
+                    </div>
+
+                    <div style="position: relative;">
+                        <canvas id="protocol-canvas" width="1100" height="600"></canvas>
+                        <div id="particle-container" class="particle-container"></div>
+                    </div>
+                </div>
+
+                <div id="timeline-tab" class="tab-content">
+                    <h2 style="color: #1e3c72; margin-bottom: 25px;">Detailed Execution Timeline</h2>
+                    <div id="timeline-container"></div>
+                </div>
+
+                <div id="calculations-tab" class="tab-content">
+                    <h2 style="color: #1e3c72; margin-bottom: 25px;">Mathematical Calculations & Proofs</h2>
+                    <div id="calculations-container"></div>
+                </div>
+
+                <div id="security-tab" class="tab-content">
+                    <h2 style="color: #1e3c72; margin-bottom: 25px;">Security Analysis & Vulnerabilities</h2>
+                    <div id="security-container"></div>
+                </div>
+
+                <div id="attack-tab" class="tab-content">
+                    <h2 style="color: #1e3c72; margin-bottom: 25px;">⚔️ Live Attack Simulation - Eve's Attempts</h2>
+                    <div id="attack-container">
+                        <div class="card">
+                            <h3 style="color: #9370db;">🎯 Run Attack Simulation</h3>
+                            <p>Simulate how an attacker (Eve) tries to break the Diffie-Hellman exchange by attempting to calculate private keys.</p>
+                            <button class="btn btn-primary" onclick="simulateAttack()" style="margin-top: 15px;">🚀 Start Attack Simulation</button>
+                        </div>
+                        <div id="attack-visualization"></div>
+                    </div>
+                </div>
+
+                <div id="encryption-tab" class="tab-content">
+                    <h2 style="color: #1e3c72; margin-bottom: 25px;">🔐 Session Key & Encryption Demo</h2>
+                    <div id="encryption-container">
+                        <div class="card">
+                            <h3 style="color: #27ae60;">💬 Encrypt a Message</h3>
+                            <div class="control-group">
+                                <label>Enter your message:</label>
+                                <input type="text" id="plaintext" placeholder="Type your secret message here..." style="width: 100%; padding: 12px;">
+                            </div>
+                            <button class="btn btn-success" onclick="encryptMessage()" style="margin-top: 15px;">🔒 Encrypt Message</button>
+                        </div>
+                        <div id="encryption-visualization"></div>
+                    </div>
+                </div>
+
+                <div id="analytics-tab" class="tab-content">
+                    <h2 style="color: #1e3c72; margin-bottom: 25px;">Performance Analytics & Metrics</h2>
+                    <div id="analytics-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>🎓 Advanced Diffie-Hellman Key Exchange Simulator</strong></p>
+            <p>Educational Cryptography Tool for University Students</p>
+            <p>© 2024 Dr. Mohammed Tawfik | Assistant Professor of Cybersecurity and Cloud Computing</p>
+            <p>Ajloun National University, Jordan | kmkhol01@gmail.com</p>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let simulationState = {
+            p: 23,
+            g: 5,
+            a: 6,
+            b: 15,
+            A: 0,
+            B: 0,
+            Ka: 0,
+            Kb: 0,
+            currentStep: 0,
+            isRunning: false,
+            particles: []
+        };
+
+        // Modular exponentiation (optimized)
+        function modPow(base, exp, mod) {
+            let result = 1;
+            base = base % mod;
+            while (exp > 0) {
+                if (exp % 2 === 1) {
+                    result = (result * base) % mod;
+                }
+                exp = Math.floor(exp / 2);
+                base = (base * base) % mod;
+            }
+            return result;
+        }
+
+        // Check if number is prime
+        function isPrime(n) {
+            if (n < 2) return false;
+            if (n === 2) return true;
+            if (n % 2 === 0) return false;
+            for (let i = 3; i <= Math.sqrt(n); i += 2) {
+                if (n % i === 0) return false;
+            }
+            return true;
+        }
+
+        // Load preset values
+        function loadPreset(type) {
+            const presets = {
+                small: { p: 23, g: 5, a: 6, b: 15 },
+                medium: { p: 97, g: 5, a: 36, b: 58 },
+                large: { p: 353, g: 3, a: 97, b: 233 },
+                xlarge: { p: 997, g: 7, a: 123, b: 456 }
+            };
+            
+            const preset = presets[type];
+            document.getElementById('prime').value = preset.p;
+            document.getElementById('generator').value = preset.g;
+            document.getElementById('alice-private').value = preset.a;
+            document.getElementById('bob-private').value = preset.b;
+        }
+
+        // Generate random values
+        function generateRandom() {
+            const primes = [23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199];
+            const p = primes[Math.floor(Math.random() * primes.length)];
+            const g = Math.floor(Math.random() * (p - 3)) + 2;
+            const a = Math.floor(Math.random() * (p - 3)) + 2;
+            const b = Math.floor(Math.random() * (p - 3)) + 2;
+            
+            document.getElementById('prime').value = p;
+            document.getElementById('generator').value = g;
+            document.getElementById('alice-private').value = a;
+            document.getElementById('bob-private').value = b;
+        }
+
+        // Update speed indicator
+        function updateSpeedIndicator() {
+            const speed = document.getElementById('speed').value;
+            const dots = document.querySelectorAll('.speed-dot');
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            if (speed == 2000) dots[0].classList.add('active');
+            else if (speed == 1500) dots[1].classList.add('active');
+            else if (speed == 1000) dots[2].classList.add('active');
+            else if (speed == 700) dots[3].classList.add('active');
+            else if (speed == 400) dots[4].classList.add('active');
+        }
+
+        // Create particle effect
+        function createParticle(x, y, color) {
+            const container = document.getElementById('particle-container');
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            particle.style.background = `radial-gradient(circle, ${color}, transparent)`;
+            
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 2 + Math.random() * 3;
+            const vx = Math.cos(angle) * velocity;
+            const vy = Math.sin(angle) * velocity;
+            
+            container.appendChild(particle);
+            
+            let posX = x;
+            let posY = y;
+            let opacity = 1;
+            
+            const animate = () => {
+                posX += vx;
+                posY += vy;
+                opacity -= 0.02;
+                
+                particle.style.left = posX + 'px';
+                particle.style.top = posY + 'px';
+                particle.style.opacity = opacity;
+                
+                if (opacity > 0) {
+                    requestAnimationFrame(animate);
+                } else {
+                    container.removeChild(particle);
+                }
+            };
+            
+            animate();
+        }
+
+        // Draw gradient circle
+        function drawGradientCircle(ctx, x, y, radius, color1, color2) {
+            const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+            gradient.addColorStop(0, color1);
+            gradient.addColorStop(1, color2);
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Add glow effect
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = color1;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        // Draw 3D box effect
+        function draw3DBox(ctx, x, y, width, height, color) {
+            // Main face
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, width, height);
+            
+            // Top face (3D effect)
+            ctx.fillStyle = lightenColor(color, 20);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + 20, y - 20);
+            ctx.lineTo(x + width + 20, y - 20);
+            ctx.lineTo(x + width, y);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Right face (3D effect)
+            ctx.fillStyle = darkenColor(color, 20);
+            ctx.beginPath();
+            ctx.moveTo(x + width, y);
+            ctx.lineTo(x + width + 20, y - 20);
+            ctx.lineTo(x + width + 20, y + height - 20);
+            ctx.lineTo(x + width, y + height);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Color manipulation functions
+        function lightenColor(color, percent) {
+            const num = parseInt(color.replace("#",""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return "#" + (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255)).toString(16).slice(1);
+        }
+
+        function darkenColor(color, percent) {
+            const num = parseInt(color.replace("#",""), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) - amt;
+            const G = (num >> 8 & 0x00FF) - amt;
+            const B = (num & 0x0000FF) - amt;
+            return "#" + (0x1000000 + (R>0?R:0)*0x10000 + (G>0?G:0)*0x100 + (B>0?B:0)).toString(16).slice(1);
+        }
+
+        // Animated arrow with improved text rendering
+        async function drawAnimatedArrow(ctx, startX, startY, endX, endY, color, label, speed) {
+            const steps = 30;
+            const dx = (endX - startX) / steps;
+            const dy = (endY - startY) / steps;
+            
+            for (let i = 0; i <= steps; i++) {
+                const x = startX + dx * i;
+                const y = startY + dy * i;
+                
+                // Draw line
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 6;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                
+                // Draw arrow head
+                if (i === steps) {
+                    const angle = Math.atan2(dy, dx);
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - 15 * Math.cos(angle - Math.PI / 6), y - 15 * Math.sin(angle - Math.PI / 6));
+                    ctx.lineTo(x - 15 * Math.cos(angle + Math.PI / 6), y - 15 * Math.sin(angle + Math.PI / 6));
+                    ctx.closePath();
+                    ctx.fill();
+                }
+                
+                // Draw label with background box
+                if (i === steps) {
+                    const midX = (startX + endX) / 2;
+                    const midY = (startY + endY) / 2;
+                    
+                    // Measure text
+                    ctx.font = 'bold 16px Arial';
+                    const textWidth = ctx.measureText(label).width;
+                    
+                    // Draw background box for text
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                    ctx.fillRect(midX - textWidth/2 - 10, midY - 25, textWidth + 20, 30);
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(midX - textWidth/2 - 10, midY - 25, textWidth + 20, 30);
+                    
+                    // Draw text
+                    ctx.fillStyle = '#2c3e50';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(label, midX, midY - 5);
+                }
+                
+                // Create particles
+                if (i % 3 === 0) {
+                    createParticle(x, y, color);
+                }
+                
+                await sleep(speed / steps);
+            }
+        }
+
+        // Start simulation
+        async function startSimulation() {
+            if (simulationState.isRunning) return;
+            
+            // Get values
+            simulationState.p = parseInt(document.getElementById('prime').value);
+            simulationState.g = parseInt(document.getElementById('generator').value);
+            simulationState.a = parseInt(document.getElementById('alice-private').value);
+            simulationState.b = parseInt(document.getElementById('bob-private').value);
+            
+            // Validate
+            if (!isPrime(simulationState.p)) {
+                alert('⚠️ Error: p must be a prime number!');
+                return;
+            }
+            
+            if (simulationState.g >= simulationState.p || simulationState.g < 2) {
+                alert('⚠️ Error: Generator must be between 2 and p-1!');
+                return;
+            }
+            
+            if (simulationState.a >= simulationState.p || simulationState.a < 2) {
+                alert('⚠️ Error: Alice\'s private key must be between 2 and p-1!');
+                return;
+            }
+            
+            if (simulationState.b >= simulationState.p || simulationState.b < 2) {
+                alert('⚠️ Error: Bob\'s private key must be between 2 and p-1!');
+                return;
+            }
+            
+            document.getElementById('loading').style.display = 'block';
+            simulationState.isRunning = true;
+            simulationState.currentStep = 0;
+            
+            const speed = parseInt(document.getElementById('speed').value);
+            
+            // Execute steps
+            await executeStep1(speed);
+            await executeStep2(speed);
+            await executeStep3(speed);
+            await executeStep4(speed);
+            await executeStep5(speed);
+            
+            document.getElementById('loading').style.display = 'none';
+            simulationState.isRunning = false;
+        }
+
+        // Step 1: Setup
+        async function executeStep1(speed) {
+            updateStepIndicator(0);
+            updateProgress(20);
+            
+            const canvas = document.getElementById('protocol-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw public parameters with 3D effect
+            draw3DBox(ctx, 400, 30, 280, 100, '#f39c12');
+            
+            ctx.strokeStyle = '#e67e22';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(400, 30, 280, 100);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 22px Arial';
+            ctx.fillText('📋 Public Parameters', 430, 60);
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(`Prime: p = ${simulationState.p}`, 450, 90);
+            ctx.fillText(`Generator: g = ${simulationState.g}`, 450, 115);
+            
+            // Particle burst effect
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => createParticle(540, 80, '#f39c12'), i * 50);
+            }
+            
+            await sleep(speed);
+        }
+
+        // Step 2: Alice generates keys
+        async function executeStep2(speed) {
+            updateStepIndicator(1);
+            updateProgress(40);
+            
+            simulationState.A = modPow(simulationState.g, simulationState.a, simulationState.p);
+            
+            const canvas = document.getElementById('protocol-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Draw Alice with enhanced graphics
+            drawGradientCircle(ctx, 150, 280, 80, '#6495ed', '#4169e1');
+            
+            draw3DBox(ctx, 50, 380, 200, 160, '#6495ed');
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('👩 ALICE', 105, 415);
+            ctx.font = '16px Arial';
+            ctx.fillText(`🔐 Private: a = ${simulationState.a}`, 70, 445);
+            ctx.fillText(`📢 Public:`, 70, 470);
+            ctx.font = '14px Arial';
+            ctx.fillText(`A = g^a mod p`, 90, 490);
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(`A = ${simulationState.A}`, 120, 520);
+            
+            // Particle effect
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => createParticle(150, 280, '#6495ed'), i * 30);
+            }
+            
+            await sleep(speed);
+        }
+
+        // Step 3: Bob generates keys
+        async function executeStep3(speed) {
+            updateStepIndicator(2);
+            updateProgress(60);
+            
+            simulationState.B = modPow(simulationState.g, simulationState.b, simulationState.p);
+            
+            const canvas = document.getElementById('protocol-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Draw Bob with enhanced graphics
+            drawGradientCircle(ctx, 950, 280, 80, '#dc143c', '#c41e3a');
+            
+            draw3DBox(ctx, 850, 380, 200, 160, '#dc143c');
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('👨 BOB', 925, 415);
+            ctx.font = '16px Arial';
+            ctx.fillText(`🔐 Private: b = ${simulationState.b}`, 870, 445);
+            ctx.fillText(`📢 Public:`, 870, 470);
+            ctx.font = '14px Arial';
+            ctx.fillText(`B = g^b mod p`, 890, 490);
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText(`B = ${simulationState.B}`, 920, 520);
+            
+            // Particle effect
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => createParticle(950, 280, '#dc143c'), i * 30);
+            }
+            
+            await sleep(speed);
+        }
+
+        // Step 4: Exchange public keys
+        async function executeStep4(speed) {
+            updateStepIndicator(3);
+            updateProgress(80);
+            
+            const canvas = document.getElementById('protocol-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Animate Alice to Bob (upper arrow)
+            await drawAnimatedArrow(ctx, 250, 450, 850, 450, '#f39c12', `Alice sends A = ${simulationState.A} →`, speed);
+            
+            await sleep(speed / 2);
+            
+            // Animate Bob to Alice (lower arrow)
+            await drawAnimatedArrow(ctx, 850, 520, 250, 520, '#e74c3c', `← Bob sends B = ${simulationState.B}`, speed);
+            
+            await sleep(speed);
+        }
+
+        // Step 5: Compute shared secret
+        async function executeStep5(speed) {
+            updateStepIndicator(4);
+            updateProgress(100);
+            
+            simulationState.Ka = modPow(simulationState.B, simulationState.a, simulationState.p);
+            simulationState.Kb = modPow(simulationState.A, simulationState.b, simulationState.p);
+            
+            const canvas = document.getElementById('protocol-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Draw shared secret with 3D effect
+            drawGradientCircle(ctx, 550, 250, 60, '#27ae60', '#229954');
+            
+            draw3DBox(ctx, 400, 160, 300, 100, '#27ae60');
+            
+            ctx.strokeStyle = '#229954';
+            ctx.lineWidth = 5;
+            ctx.strokeRect(400, 160, 300, 100);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.fillText('🔑 SHARED SECRET', 430, 190);
+            ctx.font = 'bold 22px Arial';
+            ctx.fillText(`K = ${simulationState.Ka}`, 495, 230);
+            
+            // Draw connection lines with better positioning
+            ctx.setLineDash([10, 10]);
+            ctx.strokeStyle = '#27ae60';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(150, 380);
+            ctx.lineTo(500, 260);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(950, 380);
+            ctx.lineTo(600, 260);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Massive particle explosion
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => createParticle(550, 210, '#27ae60'), i * 20);
+            }
+            
+            await sleep(speed);
+            
+            // Update all tabs
+            updateTimeline();
+            updateCalculations();
+            updateSecurity();
+            updateAnalytics();
+        }
+
+        // Update step indicator
+        function updateStepIndicator(step) {
+            simulationState.currentStep = step;
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((s, i) => {
+                s.classList.remove('active', 'completed');
+                if (i < step) s.classList.add('completed');
+                if (i === step) s.classList.add('active');
+            });
+        }
+
+        // Update progress bar
+        function updateProgress(percent) {
+            const progress = document.getElementById('progress');
+            progress.style.width = percent + '%';
+            progress.textContent = percent + '%';
+        }
+
+        // Update timeline
+        function updateTimeline() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = `
+                <div class="timeline">
+                    <div class="timeline-event">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3 style="color: #f39c12;">📋 Step 1: Public Parameters Established</h3>
+                            <p><strong>Prime modulus:</strong> p = ${simulationState.p}</p>
+                            <p><strong>Generator:</strong> g = ${simulationState.g}</p>
+                            <p><em>These values are publicly known to everyone</em></p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-event">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3 style="color: #6495ed;">👩 Step 2: Alice Generates Key Pair</h3>
+                            <p><strong>Private key (secret):</strong> a = ${simulationState.a}</p>
+                            <p><strong>Public key calculation:</strong> A = g<sup>a</sup> mod p = ${simulationState.g}<sup>${simulationState.a}</sup> mod ${simulationState.p}</p>
+                            <p><strong>Result:</strong> A = <span class="key-badge">${simulationState.A}</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-event">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3 style="color: #dc143c;">👨 Step 3: Bob Generates Key Pair</h3>
+                            <p><strong>Private key (secret):</strong> b = ${simulationState.b}</p>
+                            <p><strong>Public key calculation:</strong> B = g<sup>b</sup> mod p = ${simulationState.g}<sup>${simulationState.b}</sup> mod ${simulationState.p}</p>
+                            <p><strong>Result:</strong> B = <span class="key-badge">${simulationState.B}</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-event">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3 style="color: #f39c12;">🔄 Step 4: Public Key Exchange</h3>
+                            <p><strong>Alice → Bob:</strong> Sends A = ${simulationState.A} over public channel</p>
+                            <p><strong>Bob → Alice:</strong> Sends B = ${simulationState.B} over public channel</p>
+                            <p><em>⚠️ An eavesdropper can see these values!</em></p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-event">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3 style="color: #27ae60;">🔑 Step 5: Shared Secret Computation</h3>
+                            <p><strong>Alice computes:</strong> K<sub>A</sub> = B<sup>a</sup> mod p = ${simulationState.B}<sup>${simulationState.a}</sup> mod ${simulationState.p} = ${simulationState.Ka}</p>
+                            <p><strong>Bob computes:</strong> K<sub>B</sub> = A<sup>b</sup> mod p = ${simulationState.A}<sup>${simulationState.b}</sup> mod ${simulationState.p} = ${simulationState.Kb}</p>
+                            <p><strong>Verification:</strong> K<sub>A</sub> = K<sub>B</sub> = <span class="key-badge">${simulationState.Ka}</span> ✓</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-box">
+                    ✅ SUCCESS! Both parties have established the same shared secret key without transmitting it!
+                    <br><strong>K = ${simulationState.Ka}</strong>
+                </div>
+            `;
+        }
+
+        // Update calculations
+        function updateCalculations() {
+            const container = document.getElementById('calculations-container');
+            container.innerHTML = `
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 style="color: #6495ed;">👩 Alice's Calculations</h3>
+                        
+                        <div class="calculation-box">
+                            <strong>Step 1: Public Key Generation</strong><br><br>
+                            Formula: A = g<sup>a</sup> mod p<br><br>
+                            Substitution: A = ${simulationState.g}<sup>${simulationState.a}</sup> mod ${simulationState.p}<br><br>
+                            Calculation: ${simulationState.g}<sup>${simulationState.a}</sup> = ${Math.pow(simulationState.g, simulationState.a)}<br><br>
+                            Modulo: ${Math.pow(simulationState.g, simulationState.a)} mod ${simulationState.p}<br><br>
+                            <strong style="color: #6495ed; font-size: 1.2em;">Result: A = ${simulationState.A}</strong>
+                        </div>
+                        
+                        <div class="calculation-box">
+                            <strong>Step 2: Shared Secret Computation</strong><br><br>
+                            Formula: K = B<sup>a</sup> mod p<br><br>
+                            Substitution: K = ${simulationState.B}<sup>${simulationState.a}</sup> mod ${simulationState.p}<br><br>
+                            Using modular exponentiation...<br><br>
+                            <strong style="color: #27ae60; font-size: 1.2em;">Result: K = ${simulationState.Ka}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 style="color: #dc143c;">👨 Bob's Calculations</h3>
+                        
+                        <div class="calculation-box">
+                            <strong>Step 1: Public Key Generation</strong><br><br>
+                            Formula: B = g<sup>b</sup> mod p<br><br>
+                            Substitution: B = ${simulationState.g}<sup>${simulationState.b}</sup> mod ${simulationState.p}<br><br>
+                            Calculation: ${simulationState.g}<sup>${simulationState.b}</sup> = ${Math.pow(simulationState.g, simulationState.b)}<br><br>
+                            Modulo: ${Math.pow(simulationState.g, simulationState.b)} mod ${simulationState.p}<br><br>
+                            <strong style="color: #dc143c; font-size: 1.2em;">Result: B = ${simulationState.B}</strong>
+                        </div>
+                        
+                        <div class="calculation-box">
+                            <strong>Step 2: Shared Secret Computation</strong><br><br>
+                            Formula: K = A<sup>b</sup> mod p<br><br>
+                            Substitution: K = ${simulationState.A}<sup>${simulationState.b}</sup> mod ${simulationState.p}<br><br>
+                            Using modular exponentiation...<br><br>
+                            <strong style="color: #27ae60; font-size: 1.2em;">Result: K = ${simulationState.Kb}</strong>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-panel">
+                    <h3>🔬 Mathematical Verification & Proof</h3>
+                    <div class="math-display">
+                        <strong>Alice's Computation:</strong><br>
+                        K<sub>Alice</sub> = B<sup>a</sup> mod p<br>
+                        K<sub>Alice</sub> = (g<sup>b</sup> mod p)<sup>a</sup> mod p<br>
+                        K<sub>Alice</sub> = (g<sup>b</sup>)<sup>a</sup> mod p<br>
+                        K<sub>Alice</sub> = g<sup>ba</sup> mod p<br>
+                        K<sub>Alice</sub> = g<sup>${simulationState.b * simulationState.a}</sup> mod p<br><br>
+                        
+                        <strong>Bob's Computation:</strong><br>
+                        K<sub>Bob</sub> = A<sup>b</sup> mod p<br>
+                        K<sub>Bob</sub> = (g<sup>a</sup> mod p)<sup>b</sup> mod p<br>
+                        K<sub>Bob</sub> = (g<sup>a</sup>)<sup>b</sup> mod p<br>
+                        K<sub>Bob</sub> = g<sup>ab</sup> mod p<br>
+                        K<sub>Bob</sub> = g<sup>${simulationState.a * simulationState.b}</sup> mod p<br><br>
+                        
+                        <strong>Conclusion:</strong><br>
+                        Since ab = ba (commutativity of multiplication):<br>
+                        g<sup>ab</sup> = g<sup>ba</sup><br><br>
+                        Therefore: <strong style="color: #27ae60; font-size: 1.3em;">K<sub>Alice</sub> = K<sub>Bob</sub> = ${simulationState.Ka}</strong> ✓
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update security analysis
+        function updateSecurity() {
+            const container = document.getElementById('security-container');
+            container.innerHTML = `
+                <div class="card">
+                    <h3 style="color: #9370db;">👁️ Eve's Perspective (Eavesdropper)</h3>
+                    
+                    <div class="security-warning">
+                        <strong>⚠️ What Eve Can Intercept:</strong>
+                        <ul style="margin-top: 10px; line-height: 2;">
+                            <li>🔓 Public prime: p = ${simulationState.p}</li>
+                            <li>🔓 Public generator: g = ${simulationState.g}</li>
+                            <li>🔓 Alice's public key: A = ${simulationState.A}</li>
+                            <li>🔓 Bob's public key: B = ${simulationState.B}</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="calculation-box" style="margin-top: 20px; border-left-color: #9370db;">
+                        <strong style="color: #9370db;">🎯 Eve's Challenge:</strong><br><br>
+                        To find the shared secret K, Eve needs to solve:<br><br>
+                        <strong>The Discrete Logarithm Problem:</strong><br>
+                        Given: g = ${simulationState.g}, p = ${simulationState.p}, A = ${simulationState.A}<br>
+                        Find: a such that ${simulationState.g}<sup>a</sup> ≡ ${simulationState.A} (mod ${simulationState.p})<br><br>
+                        OR<br><br>
+                        Given: g = ${simulationState.g}, p = ${simulationState.p}, B = ${simulationState.B}<br>
+                        Find: b such that ${simulationState.g}<sup>b</sup> ≡ ${simulationState.B} (mod ${simulationState.p})<br><br>
+                        <strong style="color: #dc143c;">This is computationally infeasible for large primes!</strong>
+                    </div>
+                </div>
+                
+                <div class="grid-2" style="margin-top: 25px;">
+                    <div class="card">
+                        <h3 style="color: #27ae60;">✅ Security Strengths</h3>
+                        <ul style="line-height: 2.5; font-size: 1.05em;">
+                            <li><strong>✓</strong> Enables secure key exchange over insecure channels</li>
+                            <li><strong>✓</strong> Based on hard mathematical problem (Discrete Logarithm)</li>
+                            <li><strong>✓</strong> No need for pre-shared secrets</li>
+                            <li><strong>✓</strong> Perfect forward secrecy with ephemeral keys</li>
+                            <li><strong>✓</strong> Foundation of modern protocols (TLS, SSH, IPsec)</li>
+                            <li><strong>✓</strong> Scalable to very large key sizes</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 style="color: #e74c3c;">❌ Security Weaknesses</h3>
+                        <ul style="line-height: 2.5; font-size: 1.05em;">
+                            <li><strong>✗</strong> Vulnerable to Man-in-the-Middle (MITM) attacks</li>
+                            <li><strong>✗</strong> No built-in authentication mechanism</li>
+                            <li><strong>✗</strong> Weak security with small prime numbers</li>
+                            <li><strong>✗</strong> Vulnerable to quantum computers (Shor's algorithm)</li>
+                            <li><strong>✗</strong> Requires correct implementation to be secure</li>
+                            <li><strong>✗</strong> Computationally expensive compared to symmetric methods</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="info-panel" style="margin-top: 25px;">
+                    <h3>🛡️ Security Recommendations</h3>
+                    <div class="math-display">
+                        <strong>1. Prime Size:</strong> Use at least 2048-bit primes (3072+ recommended for long-term security)<br><br>
+                        <strong>2. Generator Verification:</strong> Ensure g is a primitive root modulo p or use safe primes<br><br>
+                        <strong>3. Add Authentication:</strong> Combine with digital signatures (RSA, ECDSA) or certificates<br><br>
+                        <strong>4. Ephemeral Keys:</strong> Generate new private keys for each session (Ephemeral DH)<br><br>
+                        <strong>5. Modern Alternatives:</strong> Consider Elliptic Curve Diffie-Hellman (ECDH) for better efficiency<br><br>
+                        <strong>6. Validate Inputs:</strong> Always validate received public keys are in valid range<br><br>
+                        <strong>7. Secure Random:</strong> Use cryptographically secure random number generators
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update analytics
+        function updateAnalytics() {
+            const container = document.getElementById('analytics-container');
+            
+            // Calculate bit length
+            const bitLength = Math.ceil(Math.log2(simulationState.p));
+            
+            // Calculate theoretical security level
+            const securityBits = Math.floor(bitLength / 2);
+            
+            container.innerHTML = `
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>📊 Key Metrics</h3>
+                        <div class="value-display">Prime Size: ${simulationState.p} (${bitLength} bits)</div>
+                        <div class="value-display">Generator: ${simulationState.g}</div>
+                        <div class="value-display">Private Key Range: [2, ${simulationState.p - 1}]</div>
+                        <div class="value-display">Public Key Size: ${bitLength} bits</div>
+                        <div class="value-display">Shared Secret: ${simulationState.Ka}</div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>🔐 Security Analysis</h3>
+                        <div class="value-display">Security Level: ~${securityBits} bits</div>
+                        <div class="value-display">Attack Complexity: O(√p) ≈ 2<sup>${securityBits}</sup></div>
+                        <div class="value-display">Status: ${bitLength >= 2048 ? '✓ Strong' : '⚠️ Weak'}</div>
+                        <div class="value-display">Recommended: ${bitLength >= 3072 ? 'Yes ✓' : 'No - Use larger prime'}</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="securityChart"></canvas>
+                </div>
+            `;
+            
+            // Create performance chart
+            const perfCtx = document.getElementById('performanceChart').getContext('2d');
+            new Chart(perfCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Key Generation', 'Public Key Exchange', 'Secret Computation', 'Total Time'],
+                    datasets: [{
+                        label: 'Time (ms)',
+                        data: [5, 2, 5, 12],
+                        backgroundColor: [
+                            'rgba(100, 149, 237, 0.7)',
+                            'rgba(220, 20, 60, 0.7)',
+                            'rgba(39, 174, 96, 0.7)',
+                            'rgba(243, 156, 18, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(100, 149, 237, 1)',
+                            'rgba(220, 20, 60, 1)',
+                            'rgba(39, 174, 96, 1)',
+                            'rgba(243, 156, 18, 1)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Performance Metrics',
+                            font: { size: 18, weight: 'bold' }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Time (milliseconds)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Create security comparison chart
+            const secCtx = document.getElementById('securityChart').getContext('2d');
+            new Chart(secCtx, {
+                type: 'line',
+                data: {
+                    labels: ['512', '1024', '2048', '3072', '4096', '8192'],
+                    datasets: [{
+                        label: 'Security Bits',
+                        data: [64, 80, 112, 128, 152, 192],
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Security Strength vs Key Size',
+                            font: { size: 18, weight: 'bold' }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Prime Size (bits)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Effective Security (bits)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Reset simulation
+        function resetSimulation() {
+            simulationState.currentStep = 0;
+            simulationState.isRunning = false;
+            
+            const canvas = document.getElementById('protocol-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Clear particles
+            document.getElementById('particle-container').innerHTML = '';
+            
+            updateStepIndicator(-1);
+            updateProgress(0);
+            
+            document.querySelectorAll('.step').forEach(s => {
+                s.classList.remove('active', 'completed');
+            });
+            
+            document.getElementById('timeline-container').innerHTML = '<p style="text-align: center; color: #999; padding: 100px; font-size: 1.2em;">▶️ Run the simulation to see the detailed timeline</p>';
+            document.getElementById('calculations-container').innerHTML = '<p style="text-align: center; color: #999; padding: 100px; font-size: 1.2em;">🔢 Run the simulation to see mathematical calculations</p>';
+            document.getElementById('security-container').innerHTML = '<p style="text-align: center; color: #999; padding: 100px; font-size: 1.2em;">🔒 Run the simulation to see security analysis</p>';
+            document.getElementById('analytics-container').innerHTML = '<p style="text-align: center; color: #999; padding: 100px; font-size: 1.2em;">📈 Run the simulation to see analytics</p>';
+            
+            // Clear new tabs
+            document.getElementById('attack-visualization').innerHTML = '';
+            document.getElementById('encryption-visualization').innerHTML = '';
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        // Helper sleep function
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Encrypt message using shared secret
+        async function encryptMessage() {
+            const plaintext = document.getElementById('plaintext').value;
+            
+            if (!plaintext) {
+                alert('⚠️ Please enter a message to encrypt!');
+                return;
+            }
+
+            if (!simulationState.Ka) {
+                alert('⚠️ Please run the main simulation first to generate a shared secret!');
+                return;
+            }
+
+            const container = document.getElementById('encryption-visualization');
+            container.innerHTML = '<div class="loading-spinner" style="display: block;"></div>';
+
+            await sleep(500);
+
+            // Simple XOR encryption with session key
+            const sessionKey = simulationState.Ka;
+            let ciphertext = '';
+            let cipherHex = '';
+            
+            for (let i = 0; i < plaintext.length; i++) {
+                const charCode = plaintext.charCodeAt(i);
+                const encrypted = charCode ^ (sessionKey + i); // XOR with key + position
+                ciphertext += String.fromCharCode(encrypted);
+                cipherHex += encrypted.toString(16).padStart(2, '0') + ' ';
+            }
+
+            const cipherBase64 = btoa(ciphertext);
+
+            container.innerHTML = `
+                <div class="grid-2" style="margin-top: 25px;">
+                    <div class="card">
+                        <h3 style="color: #6495ed;">📤 Alice's Side (Sender)</h3>
+                        <div class="calculation-box">
+                            <strong>1. Shared Secret Key:</strong><br>
+                            K = ${sessionKey}<br><br>
+                            
+                            <strong>2. Original Message:</strong><br>
+                            <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0; border: 2px solid #6495ed;">
+                                "${plaintext}"
+                            </div>
+                            
+                            <strong>3. Encryption Process:</strong><br>
+                            Using XOR cipher with session key<br><br>
+                            
+                            <strong>4. Encrypted (Hex):</strong><br>
+                            <div style="background: #2c3e50; color: #0f0; padding: 15px; border-radius: 8px; margin: 10px 0; font-family: monospace; word-break: break-all;">
+                                ${cipherHex}
+                            </div>
+                            
+                            <strong>5. Base64 Encoded:</strong><br>
+                            <div style="background: #2c3e50; color: #0ff; padding: 15px; border-radius: 8px; margin: 10px 0; font-family: monospace; word-break: break-all;">
+                                ${cipherBase64}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="color: #dc143c;">📥 Bob's Side (Receiver)</h3>
+                        <div class="calculation-box">
+                            <strong>1. Shared Secret Key:</strong><br>
+                            K = ${sessionKey}<br><br>
+                            
+                            <strong>2. Received Encrypted Data:</strong><br>
+                            <div style="background: #2c3e50; color: #0ff; padding: 15px; border-radius: 8px; margin: 10px 0; font-family: monospace; word-break: break-all;">
+                                ${cipherBase64}
+                            </div>
+                            
+                            <strong>3. Decryption Process:</strong><br>
+                            Using same XOR cipher with session key<br><br>
+                            
+                            <strong>4. Decrypted Message:</strong><br>
+                            <div style="background: white; padding: 15px; border-radius: 8px; margin: 10px 0; border: 2px solid #dc143c;">
+                                "${plaintext}"
+                            </div>
+                            
+                            <strong>✓ Decryption Successful!</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <canvas id="encryption-canvas" width="1000" height="400" style="border: 2px solid #ddd; border-radius: 10px; margin-top: 25px;"></canvas>
+
+                <div class="info-panel" style="margin-top: 25px;">
+                    <h3>🔐 How Session Key Encryption Works</h3>
+                    <div class="math-display">
+                        <strong>Step 1:</strong> Alice and Bob establish shared secret K = ${sessionKey} using Diffie-Hellman<br><br>
+                        
+                        <strong>Step 2:</strong> Alice encrypts message using K as encryption key:<br>
+                        Ciphertext[i] = Plaintext[i] ⊕ (K + i)<br><br>
+                        
+                        <strong>Step 3:</strong> Alice sends encrypted message over public channel<br><br>
+                        
+                        <strong>Step 4:</strong> Bob decrypts using same key K:<br>
+                        Plaintext[i] = Ciphertext[i] ⊕ (K + i)<br><br>
+                        
+                        <strong>Security:</strong> Eve cannot decrypt without knowing K!<br>
+                        Eve only knows: p, g, A, B (but NOT K)
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 25px;">
+                    <h3 style="color: #9370db;">👁️ Eve's Perspective</h3>
+                    <div class="security-warning">
+                        <strong>What Eve Can See:</strong><br><br>
+                        ✓ Encrypted message: ${cipherBase64}<br>
+                        ✓ Public values: p=${simulationState.p}, g=${simulationState.g}, A=${simulationState.A}, B=${simulationState.B}<br><br>
+                        
+                        <strong>What Eve CANNOT See:</strong><br><br>
+                        ✗ Session key: K = ${sessionKey}<br>
+                        ✗ Private keys: a = ${simulationState.a}, b = ${simulationState.b}<br>
+                        ✗ Original message: "${plaintext}"<br><br>
+                        
+                        <strong>Result:</strong> Eve cannot decrypt the message without solving the discrete logarithm problem!
+                    </div>
+                </div>
+            `;
+
+            // Draw encryption visualization
+            await drawEncryptionVisualization(plaintext, ciphertext, sessionKey);
+        }
+
+        // Draw encryption flow visualization
+        async function drawEncryptionVisualization(plaintext, ciphertext, key) {
+            const canvas = document.getElementById('encryption-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Clear canvas
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, 1000, 400);
+
+            // Draw title
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('Encryption Flow Visualization', 350, 30);
+
+            // Draw Alice (sender)
+            drawGradientCircle(ctx, 100, 200, 50, '#6495ed', '#4169e1');
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('ALICE', 100, 205);
+
+            // Draw plaintext box
+            ctx.fillStyle = 'white';
+            ctx.fillRect(180, 150, 150, 100);
+            ctx.strokeStyle = '#6495ed';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(180, 150, 150, 100);
+            
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '14px Arial';
+            ctx.fillText('Plaintext', 255, 175);
+            ctx.font = '12px Arial';
+            const displayText = plaintext.length > 15 ? plaintext.substring(0, 15) + '...' : plaintext;
+            ctx.fillText(displayText, 255, 200);
+
+            // Draw key box
+            ctx.fillStyle = '#f39c12';
+            ctx.fillRect(380, 80, 120, 60);
+            ctx.strokeStyle = '#e67e22';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(380, 80, 120, 60);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('Key', 440, 105);
+            ctx.font = '12px Arial';
+            ctx.fillText(`K=${key}`, 440, 125);
+
+            // Draw encryption process
+            ctx.fillStyle = '#9370db';
+            ctx.fillRect(380, 170, 120, 80);
+            ctx.strokeStyle = '#8b008b';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(380, 170, 120, 80);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('ENCRYPT', 440, 200);
+            ctx.font = '12px Arial';
+            ctx.fillText('XOR Cipher', 440, 220);
+
+            // Draw ciphertext box
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(550, 150, 150, 100);
+            ctx.strokeStyle = '#34495e';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(550, 150, 150, 100);
+            
+            ctx.fillStyle = '#0f0';
+            ctx.font = '14px Arial';
+            ctx.fillText('Ciphertext', 625, 175);
+            ctx.font = '10px monospace';
+            ctx.fillText('Encrypted', 625, 200);
+            ctx.fillText('Data...', 625, 215);
+
+            // Draw transmission arrow
+            ctx.strokeStyle = '#f39c12';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([10, 5]);
+            ctx.beginPath();
+            ctx.moveTo(700, 200);
+            ctx.lineTo(850, 200);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Arrow head
+            ctx.fillStyle = '#f39c12';
+            ctx.beginPath();
+            ctx.moveTo(850, 200);
+            ctx.lineTo(835, 195);
+            ctx.lineTo(835, 205);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '12px Arial';
+            ctx.fillText('Public Channel', 755, 190);
+
+            // Draw Bob (receiver)
+            drawGradientCircle(ctx, 900, 200, 50, '#dc143c', '#c41e3a');
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('BOB', 900, 205);
+
+            // Draw decryption (below)
+            ctx.fillStyle = '#9370db';
+            ctx.fillRect(550, 280, 150, 80);
+            ctx.strokeStyle = '#8b008b';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(550, 280, 150, 80);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('DECRYPT', 625, 310);
+            ctx.font = '12px Arial';
+            ctx.fillText('Same Key', 625, 330);
+
+            // Draw decrypted plaintext
+            ctx.fillStyle = 'white';
+            ctx.fillRect(380, 280, 150, 80);
+            ctx.strokeStyle = '#dc143c';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(380, 280, 150, 80);
+            
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '14px Arial';
+            ctx.fillText('Plaintext', 455, 305);
+            ctx.font = '12px Arial';
+            ctx.fillText(displayText, 455, 330);
+
+            // Draw Eve trying to intercept
+            drawGradientCircle(ctx, 775, 320, 40, '#9370db', '#8b008b');
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('EVE', 775, 325);
+
+            ctx.strokeStyle = '#9370db';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(775, 280);
+            ctx.lineTo(775, 220);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#dc143c';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('✗ Cannot Decrypt!', 775, 370);
+
+            // Add arrows
+            ctx.textAlign = 'left';
+        }
+
+        // Simulate attack
+        async function simulateAttack() {
+            if (!simulationState.A || !simulationState.B) {
+                alert('⚠️ Please run the main simulation first!');
+                return;
+            }
+
+            const container = document.getElementById('attack-visualization');
+            container.innerHTML = '<div class="loading-spinner" style="display: block;"></div>';
+
+            await sleep(500);
+
+            container.innerHTML = `
+                <div class="card" style="background: linear-gradient(135deg, #9370db 0%, #8b008b 100%); color: white; margin-top: 25px;">
+                    <h3>👁️ Eve (Attacker) - Packet Sniffing</h3>
+                    <div class="math-display" style="background: rgba(255,255,255,0.1); color: white;">
+                        <strong>🎯 Intercepted Data:</strong><br><br>
+                        ✓ Public Prime: p = ${simulationState.p}<br>
+                        ✓ Public Generator: g = ${simulationState.g}<br>
+                        ✓ Alice's Public Key: A = ${simulationState.A}<br>
+                        ✓ Bob's Public Key: B = ${simulationState.B}<br><br>
+                        <strong style="color: #ffc107;">⚠️ Eve CANNOT see:</strong><br>
+                        ✗ Alice's Private Key: a = ???<br>
+                        ✗ Bob's Private Key: b = ???<br>
+                        ✗ Shared Secret: K = ???
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 25px;">
+                    <h3 style="color: #dc143c;">🔨 Brute Force Attack Attempt</h3>
+                    <p><strong>Eve's Strategy:</strong> Try all possible values of 'a' until finding one where g<sup>a</sup> mod p = A</p>
+                    <div id="brute-force-progress"></div>
+                    <canvas id="attack-canvas" width="1000" height="400" style="border: 2px solid #ddd; border-radius: 10px; margin-top: 20px;"></canvas>
+                </div>
+
+                <div id="attack-results"></div>
+            `;
+
+            await bruteForceAttack();
+        }
+
+        // Brute force attack visualization
+        async function bruteForceAttack() {
+            const progressDiv = document.getElementById('brute-force-progress');
+            const resultsDiv = document.getElementById('attack-results');
+            const canvas = document.getElementById('attack-canvas');
+            const ctx = canvas.getContext('2d');
+
+            let attempts = 0;
+            let found = false;
+            const maxAttempts = Math.min(simulationState.p - 1, 50); // Limit visualization
+
+            progressDiv.innerHTML = `
+                <div class="progress-bar" style="margin: 20px 0;">
+                    <div class="progress-fill" id="attack-progress" style="width: 0%;">0%</div>
+                </div>
+                <div id="attempt-counter" style="text-align: center; font-size: 1.2em; font-weight: bold; color: #9370db;"></div>
+            `;
+
+            // Draw attack visualization
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, 1000, 400);
+
+            // Draw header
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 18px Arial';
+            ctx.fillText('Eve\'s Brute Force Attack Progress', 300, 30);
+
+            // Draw target
+            ctx.fillStyle = '#27ae60';
+            ctx.fillRect(800, 150, 150, 100);
+            ctx.strokeStyle = '#229954';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(800, 150, 150, 100);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('TARGET', 835, 180);
+            ctx.fillText(`A = ${simulationState.A}`, 835, 210);
+
+            // Simulate brute force attempts
+            for (let guess = 2; guess < simulationState.p && attempts < maxAttempts; guess++) {
+                attempts++;
+                const testValue = modPow(simulationState.g, guess, simulationState.p);
+                const progress = (attempts / maxAttempts) * 100;
+
+                // Update progress
+                document.getElementById('attack-progress').style.width = progress + '%';
+                document.getElementById('attack-progress').textContent = Math.round(progress) + '%';
+                document.getElementById('attempt-counter').innerHTML = `
+                    Attempt ${attempts}: Testing a = ${guess}<br>
+                    Computing: ${simulationState.g}<sup>${guess}</sup> mod ${simulationState.p} = ${testValue}<br>
+                    ${testValue === simulationState.A ? '<span style="color: #27ae60;">✓ MATCH FOUND!</span>' : '<span style="color: #dc143c;">✗ No match</span>'}
+                `;
+
+                // Draw attempt on canvas
+                const x = 50 + (attempts % 20) * 45;
+                const y = 80 + Math.floor(attempts / 20) * 60;
+
+                if (testValue === simulationState.A) {
+                    // Found!
+                    ctx.fillStyle = '#27ae60';
+                    found = true;
+                } else {
+                    // Failed attempt
+                    ctx.fillStyle = '#dc143c';
+                }
+
+                ctx.beginPath();
+                ctx.arc(x, y, 15, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = 'white';
+                ctx.font = '12px Arial';
+                ctx.fillText(guess, x - 8, y + 5);
+
+                // Draw arrow to target if found
+                if (found) {
+                    ctx.strokeStyle = '#27ae60';
+                    ctx.lineWidth = 4;
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(x + 15, y);
+                    ctx.lineTo(800, 200);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // Particle explosion
+                    for (let i = 0; i < 30; i++) {
+                        setTimeout(() => createParticle(x, y, '#27ae60'), i * 20);
+                    }
+
+                    break;
+                }
+
+                await sleep(100);
+            }
+
+            // Show results
+            if (found) {
+                resultsDiv.innerHTML = `
+                    <div class="result-box" style="background: linear-gradient(135deg, #27ae60 0%, #229954 100%); margin-top: 25px;">
+                        ✓ SUCCESS! Eve found Alice's private key after ${attempts} attempts!<br>
+                        <strong>a = ${simulationState.a}</strong>
+                    </div>
+                    <div class="card" style="margin-top: 25px;">
+                        <h3 style="color: #27ae60;">Attack Successful (Small Prime)</h3>
+                        <div class="calculation-box">
+                            <strong>Time Taken:</strong> ${attempts} attempts × ~0.1s = ${(attempts * 0.1).toFixed(1)} seconds<br><br>
+                            <strong>Why it worked:</strong> The prime p = ${simulationState.p} is very small!<br><br>
+                            <strong>With large primes:</strong> For p with 2048 bits, there are approximately 2<sup>2048</sup> possible values.<br>
+                            At 1 billion attempts/second, it would take longer than the age of the universe!
+                        </div>
+                    </div>
+                `;
+            } else {
+                const totalPossible = simulationState.p - 2;
+                const timeEstimate = (totalPossible * 0.0001).toFixed(2);
+
+                resultsDiv.innerHTML = `
+                    <div class="security-warning" style="margin-top: 25px;">
+                        <strong>⏱️ Attack In Progress...</strong><br><br>
+                        Tested: ${attempts} / ${totalPossible} possible values<br>
+                        Estimated time to test all: ${timeEstimate} seconds<br><br>
+                        <em>For demonstration purposes, we limited to ${maxAttempts} attempts.</em>
+                    </div>
+                    <div class="card" style="margin-top: 25px;">
+                        <h3 style="color: #9370db;">Real-World Security</h3>
+                        <div class="calculation-box">
+                            <strong>Current prime (p = ${simulationState.p}):</strong> ${Math.ceil(Math.log2(simulationState.p))} bits<br><br>
+                            <strong>2048-bit prime:</strong> ~10<sup>616</sup> possible values<br>
+                            <strong>Attack time:</strong> Trillions of years!<br><br>
+                            <strong>Quantum computers:</strong> Can break this with Shor's algorithm<br>
+                            <strong>Solution:</strong> Use larger primes (3072+ bits) or switch to post-quantum cryptography
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            resetSimulation();
+            updateSpeedIndicator();
+        };
+    </script>
+</body>
+</html>
